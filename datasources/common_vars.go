@@ -136,16 +136,13 @@ type ConfGlobal struct {
 
 // Conf is the combined config struct, defines YAML file
 type Conf struct {
-	ConfGlobal `yaml:"global"`
-	BTRFS      ConfBtrfs    `yaml:"btrfs"`
-	CPU        ConfTempCPU  `yaml:"cpu"`
-	Disk       ConfTempDisk `yaml:"disk"`
-	Docker     ConfDocker   `yaml:"docker"`
-	Podman     ConfPodman   `yaml:"podman"`
-	SysInfo    ConfSysInfo  `yaml:"sysinfo"`
-	Systemd    ConfSystemd  `yaml:"systemd"`
-	Updates    ConfUpdates  `yaml:"updates"`
-	ZFS        ConfZFS      `yaml:"zfs"`
+	ConfGlobal   `yaml:"global"`
+	CPU          ConfTempCPU  `yaml:"cpu"`
+	Docker       ConfDocker   `yaml:"docker"`
+	SysInfo      ConfSysInfo  `yaml:"sysinfo"`
+	UserDrives   ConfDrives   `yaml:"user-drives"`
+	SystemDrives ConfDrives   `yaml:"system-drives"`
+	Networks     ConfNet      `yaml:"network"`
 }
 
 // Init a config with sane default values
@@ -154,15 +151,12 @@ func (c *Conf) Init() {
 	c.WarnOnly = true
 	c.ColPad = 4
 	// Init data source configs
-	c.BTRFS.Init()
 	c.CPU.Init()
-	c.Disk.Init()
 	c.Docker.Init()
-	c.Podman.Init()
 	c.SysInfo.Init()
-	c.Systemd.Init()
-	c.Updates.Init()
-	c.ZFS.Init()
+	c.UserDrives.Init()
+	c.SystemDrives.Init()
+	c.Networks.Init()
 }
 
 func NewConfFromFile(path string, debug bool) (c Conf, err error) {
@@ -191,24 +185,18 @@ Loop:
 	for _, k := range runList {
 		ch := make(chan SourceReturn, 1)
 		switch k {
-		case "btrfs":
-			go GetBtrfs(ch, c)
 		case "cpu":
 			go GetCPUTemp(ch, c)
-		case "disk":
-			go GetDiskTemps(ch, c)
 		case "docker":
 			go GetDocker(ch, c)
-		case "podman":
-			go GetPodman(ch, c)
 		case "sysinfo":
 			go GetSysInfo(ch, c)
-		case "systemd":
-			go GetSystemd(ch, c)
-		case "updates":
-			go GetUpdates(ch, c)
-		case "zfs":
-			go GetZFS(ch, c)
+		case "user-drives":
+			go GetUserDrives(ch, c)
+		case "system-drives":
+			go GetSystemDrives(ch, c)
+		case "networks":
+			go GetNetworks(ch, c)
 		default:
 			log.Warnf("no data source named %s", k)
 			continue Loop

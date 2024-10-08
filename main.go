@@ -23,7 +23,7 @@ import (
 const defaultRefresh string = "10m"
 
 var defaultCfgPath = "./config.yaml"
-var defaultOrder = []string{"sysinfo", "updates", "systemd", "docker", "podman", "disk", "cpu", "zfs", "btrfs"}
+var defaultOrder = []string{"sysinfo", "cpu", "docker", "user-drives", "system-drives", "networks"}
 
 func makeTable(buf *strings.Builder, padding int) (table *tablewriter.Table) {
 	table = tablewriter.NewWriter(buf)
@@ -72,9 +72,6 @@ func mapToTable(buf *strings.Builder, inStr map[string]string, colDef [][]string
 
 // makePrintOrder flattens colDef (if present). If showOrder is defined as well, it is ignored.
 func makePrintOrder(c *datasources.Conf) (printOrder []string) {
-	if args.Updates {
-		return []string{"updates"}
-	}
 	if len(c.ColDef) > 0 {
 		// Flatten 2-dim input
 		for _, row := range c.ColDef {
@@ -104,7 +101,6 @@ var args struct {
 	PID             string        `arg:"--pid" help:"Write PID to file or log if '-'"`
 	Quiet           bool          `arg:"-q,--quiet" help:"Don't log to console"`
 	RefreshInterval time.Duration `arg:"--refresh-interval,env:REFRESH_INTERVAL" help:"Time interval between data refreshes"`
-	Updates         bool          `arg:"-u,--updates" help:"Show pending updates and exit"`
 }
 
 func setupLogging() {
@@ -279,13 +275,6 @@ func main() {
 			dumpConfig(&c, "")
 		}
 		return
-	}
-
-	if args.Updates {
-		log.Debug("Show only updates")
-		// Set show to true
-		c.Updates.Show = &args.Updates
-		c.Updates.PadHeader = []int{0, 0}
 	}
 
 	if args.Daemon {

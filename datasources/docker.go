@@ -27,7 +27,8 @@ type ConfDocker struct {
 // Init sets up default alignment
 func (c *ConfDocker) Init() {
 	c.ConfBase.Init()
-	c.PadHeader[1] = 3
+	c.PadHeader[1] = 4
+	c.PadContent[1] = 1
 }
 
 // GetDocker docker container status using the API

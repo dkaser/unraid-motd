@@ -36,7 +36,7 @@ func GetSysInfo(ch chan<- SourceReturn, conf *Conf) {
 	}
 	// Fetch all the things
 	var info = [...]entry{
-		{"Distro", getDistroName()},
+		{"Version", getDistroName()},
 		{"Kernel", getKernel()},
 		{"Uptime", getUptime()},
 		{"Load", getLoadAvg()},
@@ -63,7 +63,7 @@ func runCmd(name string, args string, buf *bytes.Buffer) (string, error) {
 }
 
 func getDistroName() (retStr string) {
-	file, err := os.Open("/etc/os-release")
+	file, err := os.Open("/etc/unraid-version")
 	if err != nil {
 		retStr = utils.Warn("unavailable")
 		return
@@ -72,7 +72,7 @@ func getDistroName() (retStr string) {
 
 	scanner := bufio.NewScanner(file)
 	// Look for pretty name
-	re := regexp.MustCompile(`PRETTY_NAME=(.*)`)
+	re := regexp.MustCompile(`version=(.*)`)
 	for scanner.Scan() {
 		m := re.FindSubmatch(scanner.Bytes())
 		if len(m) > 1 {

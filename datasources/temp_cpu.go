@@ -21,7 +21,7 @@ type ConfTempCPU struct {
 // Init sets up default alignment
 func (c *ConfTempCPU) Init() {
 	c.ConfBaseWarn.Init()
-	c.PadHeader[1] = 1
+	c.PadHeader[1] = 2
 }
 
 // GetCPUTemp returns CPU core temps using gopsutil or parsing sensors output
