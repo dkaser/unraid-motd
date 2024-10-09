@@ -1,7 +1,9 @@
 package datasources
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"sort"
 	"strings"
@@ -81,6 +83,7 @@ type ConfBase struct {
 	PadContent []int `yaml:"pad_content,flow"`
 	padL       string
 	padR       string
+	FixedTableWidth *int `yaml:"table_width,omitempty"`
 }
 
 // Init sets `PadHeader` and `PadContent` to [0, 0]
@@ -132,6 +135,9 @@ type ConfGlobal struct {
 	ColPad int `yaml:"col_pad"`
 	// Internal variables
 	debug bool
+
+	ShowHeader bool `yaml:"header"`
+	FixedTableWidth int `yaml:"table_width"`
 }
 
 // Conf is the combined config struct, defines YAML file
@@ -143,6 +149,7 @@ type Conf struct {
 	UserDrives   ConfDrives   `yaml:"user-drives"`
 	SystemDrives ConfDrives   `yaml:"system-drives"`
 	Networks     ConfNet      `yaml:"network"`
+	Services     ConfServices `yaml:"services"`
 }
 
 // Init a config with sane default values
@@ -150,6 +157,8 @@ func (c *Conf) Init() {
 	// Set global defaults
 	c.WarnOnly = true
 	c.ColPad = 4
+	c.ShowHeader = true
+	c.FixedTableWidth = 0
 	// Init data source configs
 	c.CPU.Init()
 	c.Docker.Init()
@@ -157,14 +166,18 @@ func (c *Conf) Init() {
 	c.UserDrives.Init()
 	c.SystemDrives.Init()
 	c.Networks.Init()
+	c.Services.Init()
 }
 
 func NewConfFromFile(path string, debug bool) (c Conf, err error) {
 	c.Init()
 	c.debug = debug
 	yamlFile, errF := os.ReadFile(path)
+	if errors.Is(errF, fs.ErrNotExist) {
+		return
+	}
 	if errF != nil {
-		err = fmt.Errorf("config file error: %v ", err)
+		err = fmt.Errorf("config file error: %v ", errF)
 		return
 	}
 	err = yaml.Unmarshal(yamlFile, &c)
@@ -197,6 +210,8 @@ Loop:
 			go GetSystemDrives(ch, c)
 		case "networks":
 			go GetNetworks(ch, c)
+		case "services":
+			go GetServices(ch, c)
 		default:
 			log.Warnf("no data source named %s", k)
 			continue Loop

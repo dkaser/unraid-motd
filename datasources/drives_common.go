@@ -1,9 +1,9 @@
 package datasources
 
 import (
-  "github.com/cosandr/go-motd/utils"
-  "fmt"
-  "github.com/shirou/gopsutil/v3/disk"
+	"fmt"
+	"github.com/cosandr/go-motd/utils"
+	"github.com/shirou/gopsutil/v3/disk"
 )
 
 type ConfDrives struct {
@@ -12,15 +12,15 @@ type ConfDrives struct {
 
 // Init is mandatory
 func (c *ConfDrives) Init() {
-    // Base init must be called
-    c.ConfBaseWarn.Init()
-    c.PadHeader[1] = 1
+	// Base init must be called
+	c.ConfBaseWarn.Init()
+	c.PadHeader[1] = 1
 	c.PadContent[1] = 1
 	c.WarnOnly = new(bool)
 }
 
 func getSystemDirs() []string {
-    return []string{"/var/log", "/boot", "/var/lib/docker"}
+	return []string{"/var/log", "/boot", "/var/lib/docker"}
 }
 
 func processDrive(c *ConfDrives, mountpoint string, status string, content string) (newStatus string, percent int, used string, total string, err error) {
@@ -42,7 +42,7 @@ func processDrive(c *ConfDrives, mountpoint string, status string, content strin
 	return
 }
 
-func formatDriveUsage(c *ConfDrives, percent int) (string) {
+func formatDriveUsage(c *ConfDrives, percent int) string {
 	text := fmt.Sprintf("%d%%", percent)
 
 	if percent >= c.Warn && percent < c.Crit {
@@ -54,7 +54,7 @@ func formatDriveUsage(c *ConfDrives, percent int) (string) {
 	}
 }
 
-func getDriveHeader (c *ConfDrives, title string, status string) (header string, err error) {
+func getDriveHeader(c *ConfDrives, title string, status string) (header string, err error) {
 	if status == "o" {
 		header = fmt.Sprintf("%s: %s\n", utils.Wrap(title, c.padL, c.padR), utils.Good("OK"))
 	} else if status == "w" {
@@ -65,7 +65,7 @@ func getDriveHeader (c *ConfDrives, title string, status string) (header string,
 	return
 }
 
-func getDriveHeaderTable (c *ConfDrives, title string, status string) (header string, err error) {
+func getDriveHeaderTable(c *ConfDrives, title string, status string) (header string, err error) {
 	if status == "o" {
 		header = fmt.Sprintf("%s: %s", title, utils.Good("OK"))
 	} else if status == "w" {

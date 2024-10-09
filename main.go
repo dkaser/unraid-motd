@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/signal"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/alexflint/go-arg"
@@ -18,12 +16,12 @@ import (
 
 	"github.com/cosandr/go-motd/datasources"
 	"github.com/cosandr/go-motd/utils"
+
+	"golang.org/x/term"
 )
 
-const defaultRefresh string = "10m"
-
 var defaultCfgPath = "./config.yaml"
-var defaultOrder = []string{"sysinfo", "cpu", "docker", "user-drives", "system-drives", "networks"}
+var defaultOrder = []string{"sysinfo", "cpu", "docker", "user-drives", "system-drives", "networks", "services"}
 
 func makeTable(buf *strings.Builder, padding int) (table *tablewriter.Table) {
 	table = tablewriter.NewWriter(buf)
@@ -192,64 +190,16 @@ func runModules(c *datasources.Conf) {
 	}
 }
 
-func runDaemon(c *datasources.Conf) {
-	if args.PID == "-" {
-		log.Infof("PID: %d", os.Getpid())
-	} else if args.PID != "" {
-		err := os.WriteFile(args.PID, []byte(fmt.Sprint(os.Getpid())), 0644)
-		if err != nil {
-			log.Errorf("cannot write PID: %v", err)
-		}
-	}
-	defer func() {
-		// Delete PID file if it exists
-		if args.PID != "-" && args.PID != "" {
-			info, err := os.Stat(args.PID)
-			if os.IsNotExist(err) {
-				return
-			}
-			if !info.IsDir() {
-				if err := os.Remove(args.PID); err != nil {
-					log.Error(err)
-				}
-			}
-		}
-	}()
-	log.Infof("auto-refresh every %v", args.RefreshInterval)
-	var refreshStart time.Time
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
-	ticker := time.NewTicker(args.RefreshInterval)
-	// Always run at startup
-	runModules(c)
-	for {
-		select {
-		case <-ticker.C:
-			log.Debug("auto-refresh ticker")
-			if args.Debug {
-				refreshStart = time.Now()
-			}
-			runModules(c)
-			if args.Debug {
-				log.Debugf("refresh ran in: %s", time.Now().Sub(refreshStart).String())
-			}
-		case s := <-signals:
-			switch s {
-			case syscall.SIGHUP:
-				log.Debug("SIGHUP received, refreshing")
-				runModules(c)
-				ticker.Reset(args.RefreshInterval)
-			default:
-				log.Warn("exit signal received")
-				return
-			}
-		}
-	}
-}
-
 func main() {
+	if !term.IsTerminal(0) {
+		return
+	}
+	width, _, err := term.GetSize(0)
+	if err != nil {
+		return
+	}
+
 	args.ConfigFile = defaultCfgPath
-	args.RefreshInterval, _ = time.ParseDuration(defaultRefresh)
 	arg.MustParse(&args)
 
 	setupLogging()
@@ -267,6 +217,10 @@ func main() {
 		log.Warn(err)
 	}
 
+	if (c.FixedTableWidth > width) {
+		c.FixedTableWidth = width
+	}
+
 	if args.DumpConfig {
 		log.Info("Dumping config")
 		if flag.NArg() > 0 {
@@ -277,11 +231,8 @@ func main() {
 		return
 	}
 
-	if args.Daemon {
-		runDaemon(&c)
-	} else {
-		runModules(&c)
-	}
+	runModules(&c)
+
 	// Show timing results
 	if args.Debug {
 		log.Debugf("main ran in: %s", time.Now().Sub(mainStart).String())
