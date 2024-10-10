@@ -3,7 +3,7 @@ package datasources
 // Conf is the combined config struct, defines YAML file
 type Conf struct {
 	ConfGlobal   `yaml:"global"`
-	Header		 ConfHeader   `yaml:"header"`
+	Header       ConfHeader   `yaml:"header"`
 	CPU          ConfTempCPU  `yaml:"cpu"`
 	Docker       ConfDocker   `yaml:"docker"`
 	SysInfo      ConfSysInfo  `yaml:"sysinfo"`
@@ -21,9 +21,9 @@ func (c *Conf) Init() {
 	c.ColPad = 1
 	c.ColDef = [][]string{
 		{"sysinfo"},
-		{"docker","cpu"},
-		{"services","networks"},
-		{"user-drives","system-drives"},
+		{"docker", "cpu"},
+		{"services", "networks"},
+		{"user-drives", "system-drives"},
 	}
 	c.FixedTableWidth = 60
 	c.Header.Init()

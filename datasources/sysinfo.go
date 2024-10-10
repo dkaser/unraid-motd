@@ -31,7 +31,7 @@ func GetSysInfo(ch chan<- SourceReturn, conf *Conf) {
 
 	sr := NewSourceReturn(conf.debug)
 	defer func() {
-		ch <- sr.Return(&c.ConfBase)
+		ch <- sr.Return()
 	}()
 	type entry struct {
 		name    string
@@ -69,13 +69,15 @@ func runCmd(name string, args string, buf *bytes.Buffer) (string, error) {
 		retStr = buf.String()
 	}
 	buf.Reset()
-	return retStr, err
+
+	return retStr, fmt.Errorf("failed to run command: %v", err)
 }
 
 func getDistroName() (retStr string) {
 	file, err := os.Open("/etc/unraid-version")
 	if err != nil {
 		retStr = utils.Warn("unavailable")
+
 		return
 	}
 	defer file.Close()
@@ -88,13 +90,16 @@ func getDistroName() (retStr string) {
 		if len(m) > 1 {
 			// Remove quotes
 			retStr = strings.Replace(string(m[1]), `"`, "", 2)
+
 			return
 		}
 	}
 	if err := scanner.Err(); err != nil {
 		retStr = utils.Warn("unavailable")
+
 		return
 	}
+
 	return
 }
 
@@ -105,6 +110,7 @@ func getUptime() string {
 		return uptime
 	}
 	re := regexp.MustCompile(`(up\s|\n)`)
+
 	return re.ReplaceAllString(uptime, "")
 }
 
@@ -114,6 +120,7 @@ func getLoadAvg() string {
 		return utils.Warn("unavailable")
 	}
 	var loadArr = strings.Split(string(loadavg), " ")
+
 	return fmt.Sprintf("%s [1m], %s [5m], %s [15m]", loadArr[0], loadArr[1], loadArr[2])
 }
 
@@ -121,6 +128,7 @@ func getMemoryInfo() (retStr string) {
 	file, err := os.Open("/proc/meminfo")
 	if err != nil {
 		retStr = utils.Warn("unavailable")
+
 		return
 	}
 	defer file.Close()
@@ -153,8 +161,10 @@ func getMemoryInfo() (retStr string) {
 	}
 	if err := scanner.Err(); err != nil {
 		retStr = utils.Warn("unavailable")
+
 		return
 	}
+
 	// Convert to GB, meminfo is in kB
 	return fmt.Sprintf("%.2f GB active of %.2f GB", memActive/1e6, memTotal/1e6)
 }
@@ -162,5 +172,6 @@ func getMemoryInfo() (retStr string) {
 func getKernel() string {
 	var buf bytes.Buffer
 	var kernel, _ = runCmd("uname", "-sr", &buf)
+
 	return strings.ReplaceAll(kernel, "\n", "")
 }

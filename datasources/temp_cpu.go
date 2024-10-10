@@ -28,7 +28,7 @@ func GetCPUTemp(ch chan<- SourceReturn, conf *Conf) {
 
 	sr := NewSourceReturn(conf.debug)
 	defer func() {
-		ch <- sr.Return(&c.ConfBase)
+		ch <- sr.Return()
 	}()
 	var tempMap map[string]int
 	var isZen bool
@@ -40,16 +40,14 @@ func GetCPUTemp(ch chan<- SourceReturn, conf *Conf) {
 	}
 
 	if len(tempMap) == 0 {
-		err = &ModuleNotAvailable{"cpu", err}
-
 		t := GetTableWriter(c)
-		sr.Content = RenderTable(t, "CPU Temp: " + utils.Warn("Unavailable"))
+		sr.Content = RenderTable(t, "CPU Temp: "+utils.Warn("Unavailable"))
 	} else {
-		sr.Content, sr.Error = formatCPUTemps(tempMap, isZen, &c)
+		sr.Content = formatCPUTemps(tempMap, isZen, &c)
 	}
 }
 
-func formatCPUTemps(tempMap map[string]int, isZen bool, c *ConfTempCPU) (content string, err error) {
+func formatCPUTemps(tempMap map[string]int, isZen bool, c *ConfTempCPU) (content string) {
 	t := GetTableWriter(c)
 	var title string
 
@@ -91,6 +89,7 @@ func formatCPUTemps(tempMap map[string]int, isZen bool, c *ConfTempCPU) (content
 	}
 
 	content = RenderTable(t, title)
+
 	return
 }
 
@@ -120,5 +119,6 @@ func cpuTempGopsutil() (tempMap map[string]int, isZen bool, err error) {
 	} else {
 		err = nil
 	}
+
 	return
 }

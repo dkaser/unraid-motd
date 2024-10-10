@@ -19,10 +19,10 @@ type containerList struct {
 	Containers []containerStatus
 }
 
-func (cl *containerList) getContent(ignoreList []string, warnOnly bool, c TableConfig) (content string, err error) {
+func (cl *containerList) getContent(ignoreList []string, warnOnly bool, c TableConfig) (content string) {
 	t := GetTableWriter(c)
 	var title string
-	
+
 	// Make set of ignored containers
 	var ignoreSet utils.StringSet
 	ignoreSet = ignoreSet.FromList(ignoreList)
@@ -63,5 +63,6 @@ func (cl *containerList) getContent(ignoreList []string, warnOnly bool, c TableC
 	}
 
 	content = RenderTable(t, title)
+
 	return
 }

@@ -7,18 +7,17 @@ import (
 
 type ConfNet struct {
 	ConfBaseWarn `yaml:",inline"`
-	IPv4 bool `yaml:"show_ipv4"`
-	IPv6 bool `yaml:"show_ipv6"`
+	IPv4         bool `yaml:"show_ipv4"`
+	IPv6         bool `yaml:"show_ipv6"`
 }
 
 // Init is mandatory
 func (c *ConfNet) Init() {
 	// Base init must be called
 	c.ConfBaseWarn.Init()
-	
+
 	c.IPv4 = true
 	c.IPv6 = false
-
 }
 
 func GetNetworks(ch chan<- SourceReturn, conf *Conf) {
@@ -27,10 +26,9 @@ func GetNetworks(ch chan<- SourceReturn, conf *Conf) {
 
 	sr := NewSourceReturn(conf.debug)
 	defer func() {
-		ch <- sr.Return(&c.ConfBase)
+		ch <- sr.Return()
 	}()
 	sr.Content, sr.Error = getNetworkInterfaces(&c)
-	return
 }
 
 func getNetworkInterfaces(c *ConfNet) (content string, err error) {
@@ -41,7 +39,6 @@ func getNetworkInterfaces(c *ConfNet) (content string, err error) {
 
 INTERFACES:
 	for _, n := range nets {
-
 		for _, s := range deviceIgnore {
 			if strings.Contains(n.Name, s) {
 				continue INTERFACES
@@ -60,11 +57,12 @@ INTERFACES:
 			}
 		}
 
-		if (addrs != "") {
-			t.AppendRow([]interface{}{n.Name, strings.Trim(addrs, "\n") })
+		if addrs != "" {
+			t.AppendRow([]interface{}{n.Name, strings.Trim(addrs, "\n")})
 		}
 	}
 
 	content = RenderTable(t, "Networks")
+
 	return
 }

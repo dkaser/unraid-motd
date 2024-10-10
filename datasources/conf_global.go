@@ -11,6 +11,6 @@ type ConfGlobal struct {
 	// Internal variables
 	debug bool
 
-	FixedTableWidth int `yaml:"table_width"`
-	Border bool `yaml:"border"`
+	FixedTableWidth int  `yaml:"table_width"`
+	Border          bool `yaml:"border"`
 }

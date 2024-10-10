@@ -16,8 +16,8 @@ import (
 
 	"github.com/dkaser/unraid-motd/datasources"
 
-	"golang.org/x/term"
 	"github.com/arsham/figurine/figurine"
+	"golang.org/x/term"
 )
 
 var defaultCfgPath = "./config.yaml"
@@ -34,6 +34,7 @@ func makeTable(buf *strings.Builder, padding int) (table *tablewriter.Table) {
 	table.SetBorder(false)
 	table.SetTablePadding(strings.Repeat(" ", padding))
 	table.SetNoWhiteSpace(true)
+
 	return
 }
 
@@ -50,6 +51,7 @@ func mapToTable(buf *strings.Builder, inStr map[string]string, colDef [][]string
 				continue
 			}
 			_, _ = fmt.Fprintln(buf, a)
+
 			continue
 		}
 		tmp = nil
@@ -71,35 +73,26 @@ func mapToTable(buf *strings.Builder, inStr map[string]string, colDef [][]string
 func makePrintOrder(c *datasources.Conf) (printOrder []string) {
 	// Flatten 2-dim input
 	for _, row := range c.ColDef {
-		for _, k := range row {
-			printOrder = append(printOrder, k)
-		}
+		printOrder = append(printOrder, row...)
 	}
 
 	return
 }
 
 var args struct {
-	ConfigFile      string        `arg:"-c,--config,env:CONFIG_FILE" help:"Path to config yaml"`
-	Daemon          bool          `arg:"-d,--daemon,env:DAEMON" help:"Run in daemon mode"`
-	Debug           bool          `arg:"--debug,env:DEBUG" help:"Debug mode"`
-	DumpConfig      bool          `arg:"--dump-config" help:"Dump config and exit"`
-	HideUnavailable bool          `arg:"--hide-unavailable,env:HIDE_UNAVAILABLE" help:"Hide unavailable modules"`
-	LogLevel        string        `arg:"--log-level,env:LOG_LEVEL" help:"Set log level"`
-	Output          string        `arg:"-o,--output,env:OUTPUT" help:"Write output to file instead of stdout"`
-	PID             string        `arg:"--pid" help:"Write PID to file or log if '-'"`
-	Quiet           bool          `arg:"-q,--quiet" help:"Don't log to console"`
-	RefreshInterval time.Duration `arg:"--refresh-interval,env:REFRESH_INTERVAL" help:"Time interval between data refreshes"`
+	ConfigFile      string `arg:"-c,--config,env:CONFIG_FILE"             help:"Path to config yaml"`
+	Debug           bool   `arg:"--debug,env:DEBUG"                       help:"Debug mode"`
+	DumpConfig      bool   `arg:"--dump-config"                           help:"Dump config and exit"`
+	HideUnavailable bool   `arg:"--hide-unavailable,env:HIDE_UNAVAILABLE" help:"Hide unavailable modules"`
+	LogLevel        string `arg:"--log-level,env:LOG_LEVEL"               help:"Set log level"`
+	PID             string `arg:"--pid"                                   help:"Write PID to file or log if '-'"`
+	Quiet           bool   `arg:"-q,--quiet"                              help:"Don't log to console"`
 }
 
 func setupLogging() {
 	var logLevel log.Level
-	var defaultLevel log.Level
-	if args.Daemon {
-		defaultLevel = log.InfoLevel
-	} else {
-		defaultLevel = log.WarnLevel
-	}
+	defaultLevel := log.WarnLevel
+
 	var err error
 	getLogLevels := func(level log.Level) []log.Level {
 		ret := make([]log.Level, 0)
@@ -108,6 +101,7 @@ func setupLogging() {
 				ret = append(ret, lvl)
 			}
 		}
+
 		return ret
 	}
 
@@ -165,14 +159,8 @@ func runModules(c *datasources.Conf) {
 			_, _ = fmt.Fprintln(outBuf, outStr[k])
 		}
 	}
-	if args.Output != "" {
-		err := os.WriteFile(args.Output, []byte(outBuf.String()), 0644)
-		if err != nil {
-			log.Error(err)
-		}
-	} else {
-		fmt.Print(outBuf.String())
-	}
+	fmt.Print(outBuf.String())
+
 	// Show timing results
 	if args.Debug {
 		for _, k := range outOrder {
@@ -205,7 +193,7 @@ func main() {
 		log.Warn(err)
 	}
 
-	if (c.FixedTableWidth > width) {
+	if c.FixedTableWidth > width {
 		c.FixedTableWidth = width
 	}
 
@@ -216,16 +204,21 @@ func main() {
 		} else {
 			dumpConfig(&c, "")
 		}
+
 		return
 	}
 
-	if (c.Header.Show) {
-		if (c.Header.UseHostname) {
-			hostname, _ := os.Hostname()
-			figurine.Write(os.Stdout, hostname, c.Header.Font)
-		} else {
-			figurine.Write(os.Stdout, c.Header.CustomText, c.Header.Font)
+	if c.Header.Show {
+		text := c.Header.CustomText
+		if c.Header.UseHostname {
+			text, _ = os.Hostname()
 		}
+
+		err := figurine.Write(os.Stdout, text, c.Header.Font)
+		if err != nil {
+			log.Debug(err.Error())
+		}
+
 		fmt.Println("")
 	}
 
@@ -233,7 +226,7 @@ func main() {
 
 	// Show timing results
 	if args.Debug {
-		log.Debugf("main ran in: %s", time.Now().Sub(mainStart).String())
+		log.Debugf("main ran in: %s", time.Since(mainStart).String())
 	}
 }
 
@@ -241,17 +234,18 @@ func dumpConfig(c *datasources.Conf, writeFile string) {
 	d, err := yaml.Marshal(c)
 	if err != nil {
 		log.Errorf("Config parse error: %v", err)
+
 		return
 	}
 	if writeFile != "" {
-		err = os.WriteFile(writeFile, d, 0644)
+		err = os.WriteFile(writeFile, d, 0600)
 		if err != nil {
 			log.Errorf("Config dumped failed: %v", err)
+
 			return
 		}
 		log.Infof("Config dumped to: %s", writeFile)
 	} else {
 		fmt.Printf("%s\n", string(d))
 	}
-	return
 }

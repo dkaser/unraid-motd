@@ -6,18 +6,18 @@ import (
 )
 
 type TableConfig interface {
-    GetBorder() bool
+	GetBorder() bool
 	GetTableWidth() int
 }
 
 func GetTableWriter(c TableConfig) table.Writer {
-    t := table.NewWriter()
+	t := table.NewWriter()
 	t.SetStyle(table.StyleLight)
 	t.SetColumnConfigs([]table.ColumnConfig{
 		{Number: 1, Align: text.AlignRight},
 	})
 
-	if(c.GetTableWidth() > 0) {
+	if c.GetTableWidth() > 0 {
 		t.Style().Size = table.SizeOptions{
 			WidthMin: c.GetTableWidth(),
 			WidthMax: c.GetTableWidth(),
@@ -31,13 +31,14 @@ func GetTableWriter(c TableConfig) table.Writer {
 }
 
 func RenderTable(t table.Writer, title string) string {
-    if (t.Length() == 0) {
-        t.AppendRow([]interface{}{title})
-        t.SetColumnConfigs([]table.ColumnConfig{
-            {Number: 1, Align: text.AlignLeft},
-        })
-    } else {
-        t.SetTitle(title)
-    }
-    return t.Render()
+	if t.Length() == 0 {
+		t.AppendRow([]interface{}{title})
+		t.SetColumnConfigs([]table.ColumnConfig{
+			{Number: 1, Align: text.AlignLeft},
+		})
+	} else {
+		t.SetTitle(title)
+	}
+
+	return t.Render()
 }

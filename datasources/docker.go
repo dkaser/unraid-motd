@@ -34,19 +34,17 @@ func GetDocker(ch chan<- SourceReturn, conf *Conf) {
 
 	sr := NewSourceReturn(conf.debug)
 	defer func() {
-		ch <- sr.Return(&c.ConfBase)
+		ch <- sr.Return()
 	}()
 	var err error
 	var cl containerList
 	cl, err = getDockerContainers()
 
 	if err != nil {
-		err = &ModuleNotAvailable{"docker", err}
-
 		t := GetTableWriter(c)
-		sr.Content = RenderTable(t, "Docker: " + utils.Warn("Unavailable"))
+		sr.Content = RenderTable(t, "Docker: "+utils.Warn("Unavailable"))
 	} else {
-		sr.Content, sr.Error = cl.getContent(c.Ignore, *c.WarnOnly, c)
+		sr.Content = cl.getContent(c.Ignore, *c.WarnOnly, c)
 	}
 }
 
@@ -68,5 +66,6 @@ func getDockerContainers() (cl containerList, err error) {
 			Status: container.State,
 		})
 	}
+
 	return
 }

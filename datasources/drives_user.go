@@ -13,10 +13,9 @@ func GetUserDrives(ch chan<- SourceReturn, conf *Conf) {
 
 	sr := NewSourceReturn(conf.debug)
 	defer func() {
-		ch <- sr.Return(&c.ConfBase)
+		ch <- sr.Return()
 	}()
 	sr.Content, sr.Error = getUserDriveUsage(&c)
-	return
 }
 
 func getUserDriveUsage(c *ConfDrives) (content string, err error) {
@@ -29,6 +28,7 @@ func getUserDriveUsage(c *ConfDrives) (content string, err error) {
 	parts, err := disk.Partitions(true)
 	if err != nil {
 		err = &ModuleNotAvailable{"drives", err}
+
 		return
 	}
 
@@ -48,17 +48,15 @@ PARTITIONS:
 			continue PARTITIONS
 		}
 
-		newStatus, percent, used, total, _ := processDrive(c, p.Mountpoint, status, content)
+		newStatus, percent, used, total := processDrive(c, p.Mountpoint, status)
 		status = newStatus
 
-		if (percent >= c.Warn) || (! *c.WarnOnly) {
+		if (percent >= c.Warn) || (!*c.WarnOnly) {
 			t.AppendRow([]interface{}{p.Mountpoint, formatDriveUsage(c, percent), fmt.Sprintf("%s %s %s", used, "used out of", total)})
 		}
 	}
 
-	title, _ := getDriveHeaderTable(c, "User Drives", status)
-
-	content = RenderTable(t, title)
+	content = RenderTable(t, getDriveHeaderTable("User Drives", status))
 
 	return
 }

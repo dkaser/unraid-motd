@@ -21,7 +21,7 @@ func getSystemDirs() []string {
 	return []string{"/var/log", "/boot", "/var/lib/docker"}
 }
 
-func processDrive(c *ConfDrives, mountpoint string, status string, content string) (newStatus string, percent int, used string, total string, err error) {
+func processDrive(c *ConfDrives, mountpoint string, status string) (newStatus string, percent int, used string, total string) {
 	diskUsage, _ := disk.Usage(mountpoint)
 
 	used = utils.FormatBytes(float64(diskUsage.Used))
@@ -37,6 +37,7 @@ func processDrive(c *ConfDrives, mountpoint string, status string, content strin
 	}
 
 	newStatus = status
+
 	return
 }
 
@@ -47,12 +48,12 @@ func formatDriveUsage(c *ConfDrives, percent int) string {
 		return utils.Warn(text)
 	} else if percent >= c.Crit {
 		return utils.Err(text)
-	} else {
-		return utils.Good(text)
 	}
+
+	return utils.Good(text)
 }
 
-func getDriveHeaderTable(c *ConfDrives, title string, status string) (header string, err error) {
+func getDriveHeaderTable(title string, status string) (header string) {
 	if status == "o" {
 		header = fmt.Sprintf("%s: %s", title, utils.Good("OK"))
 	} else if status == "w" {
@@ -60,5 +61,6 @@ func getDriveHeaderTable(c *ConfDrives, title string, status string) (header str
 	} else {
 		header = fmt.Sprintf("%s: %s", title, utils.Err("Critical"))
 	}
+
 	return
 }
