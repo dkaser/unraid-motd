@@ -4,19 +4,19 @@ go 1.22
 
 require (
 	github.com/alexflint/go-arg v1.5.1
-	github.com/coreos/go-systemd/v22 v22.5.0
-	github.com/cosandr/go-check-updates v0.0.0-20210414124036-9af655b1bd07
+	github.com/arsham/figurine v1.3.0
 	github.com/docker/docker v27.1.1+incompatible
+	github.com/jedib0t/go-pretty/v6 v6.6.1-0.20241006232248-730bce77255a
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/sirupsen/logrus v1.9.3
+	golang.org/x/term v0.25.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/alexflint/go-scalar v1.2.0 // indirect
-	github.com/arsham/figurine v1.3.0 // indirect
 	github.com/arsham/rainbow v1.2.1 // indirect
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be // indirect
 	github.com/containerd/log v0.1.0 // indirect
@@ -27,9 +27,8 @@ require (
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
-	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/jedib0t/go-pretty/v6 v6.6.1-0.20241006232248-730bce77255a // indirect
+	github.com/kr/pretty v0.3.1 // indirect
 	github.com/lufia/plan9stats v0.0.0-20240513124658-fba389f38bae // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
@@ -52,7 +51,6 @@ require (
 	go.opentelemetry.io/otel/trace v1.28.0 // indirect
 	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/sys v0.26.0 // indirect
-	golang.org/x/term v0.25.0 // indirect
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
 	gotest.tools/v3 v3.0.3 // indirect
 )
