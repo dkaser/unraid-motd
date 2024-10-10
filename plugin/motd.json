@@ -1,6 +1,6 @@
 {
     "name": "motd",
-    "githubRepository": "dkaser/motd",
+    "githubRepository": "dkaser/unraid-motd",
     "pluginDirectory": "/usr/local/emhttp/plugins/motd",
     "configDirectory": "/boot/config/plugins/motd",
     "minver": "6.11.5"
