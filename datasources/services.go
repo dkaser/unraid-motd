@@ -1,9 +1,7 @@
 package datasources
 
 import (
-	"github.com/cosandr/go-motd/utils"
-	"github.com/jedib0t/go-pretty/v6/table"
-	"github.com/jedib0t/go-pretty/v6/text"
+	"github.com/dkaser/unraid-motd/utils"
 	"os/exec"
 )
 
@@ -36,15 +34,12 @@ func GetServices(ch chan<- SourceReturn, conf *Conf) {
 	defer func() {
 		ch <- sr.Return(&c.ConfBase)
 	}()
-	sr.Header, sr.Content, sr.Error = getServiceStatus(&c)
+	sr.Content, sr.Error = getServiceStatus(&c)
 	return
 }
 
-func getServiceStatus(c *ConfServices) (header string, content string, err error) {
+func getServiceStatus(c *ConfServices) (content string, err error) {
 	t := GetTableWriter(*c.FixedTableWidth)
-	t.SetColumnConfigs([]table.ColumnConfig{
-		{Number: 1, Align: text.AlignRight},
-	})
 
 	overall := utils.Good("OK")
 
@@ -64,7 +59,7 @@ func getServiceStatus(c *ConfServices) (header string, content string, err error
 
 		t.AppendRow([]interface{}{s, status})
 	}
-	
+
 	content = RenderTable(t, "Services: " + overall)
 	return
 }

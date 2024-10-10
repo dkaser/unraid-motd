@@ -2,8 +2,6 @@ package datasources
 
 import (
 	"fmt"
-	"github.com/jedib0t/go-pretty/v6/table"
-	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/shirou/gopsutil/v3/disk"
 	"slices"
 	"strings"
@@ -19,15 +17,12 @@ func GetUserDrives(ch chan<- SourceReturn, conf *Conf) {
 	defer func() {
 		ch <- sr.Return(&c.ConfBase)
 	}()
-	sr.Header, sr.Content, sr.Error = getUserDriveUsage(&c)
+	sr.Content, sr.Error = getUserDriveUsage(&c)
 	return
 }
 
-func getUserDriveUsage(c *ConfDrives) (header string, content string, err error) {
+func getUserDriveUsage(c *ConfDrives) (content string, err error) {
 	t := GetTableWriter(*c.FixedTableWidth)
-	t.SetColumnConfigs([]table.ColumnConfig{
-		{Number: 1, Align: text.AlignRight},
-	})
 
 	deviceIgnore := []string{"docker/", "shfs", "nfsd", "nsfs", "/loop"}
 	allowedFs := []string{"vfat", "xfs", "btrfs", "zfs"}

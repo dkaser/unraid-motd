@@ -1,8 +1,6 @@
 package datasources
 
 import (
-	"github.com/jedib0t/go-pretty/v6/table"
-	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/shirou/gopsutil/v3/net"
 	"strings"
 )
@@ -17,8 +15,6 @@ type ConfNet struct {
 func (c *ConfNet) Init() {
 	// Base init must be called
 	c.ConfBaseWarn.Init()
-	c.PadHeader[1] = 1
-	c.PadContent[1] = 1
 	
 	c.IPv4 = true
 	c.IPv6 = false
@@ -35,15 +31,12 @@ func GetNetworks(ch chan<- SourceReturn, conf *Conf) {
 	defer func() {
 		ch <- sr.Return(&c.ConfBase)
 	}()
-	sr.Header, sr.Content, sr.Error = getNetworkInterfaces(&c)
+	sr.Content, sr.Error = getNetworkInterfaces(&c)
 	return
 }
 
-func getNetworkInterfaces(c *ConfNet) (header string, content string, err error) {
+func getNetworkInterfaces(c *ConfNet) (content string, err error) {
 	t := GetTableWriter(*c.FixedTableWidth)
-	t.SetColumnConfigs([]table.ColumnConfig{
-		{Number: 1, Align: text.AlignRight},
-	})
 
 	deviceIgnore := []string{"lo", "br-", "veth", "docker0", "vnet0"}
 	nets, err := net.Interfaces()

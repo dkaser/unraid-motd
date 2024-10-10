@@ -2,13 +2,12 @@ package datasources
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 
-	"github.com/cosandr/go-motd/utils"
+	"github.com/dkaser/unraid-motd/utils"
 )
 
 const (
@@ -18,8 +17,6 @@ const (
 // ConfDocker extends ConfBase with a list of containers to ignore
 type ConfDocker struct {
 	ConfBase `yaml:",inline"`
-	// Interact directly with the docker CLI, much slower than API
-	Exec bool `yaml:"use_exec"`
 	// List of container names to ignore
 	Ignore []string `yaml:"ignore,omitempty"`
 }
@@ -27,8 +24,6 @@ type ConfDocker struct {
 // Init sets up default alignment
 func (c *ConfDocker) Init() {
 	c.ConfBase.Init()
-	c.PadHeader[1] = 4
-	c.PadContent[1] = 1
 }
 
 // GetDocker docker container status using the API
@@ -38,22 +33,25 @@ func GetDocker(ch chan<- SourceReturn, conf *Conf) {
 	if c.WarnOnly == nil {
 		c.WarnOnly = &conf.WarnOnly
 	}
+	if c.FixedTableWidth == nil {
+		c.FixedTableWidth = &conf.FixedTableWidth
+	}
+
 	sr := NewSourceReturn(conf.debug)
 	defer func() {
 		ch <- sr.Return(&c.ConfBase)
 	}()
 	var err error
 	var cl containerList
-	if c.Exec {
-		cl, err = getContainersExec(false, false)
-	} else {
-		cl, err = getDockerContainers()
-	}
+	cl, err = getDockerContainers()
+
 	if err != nil {
 		err = &ModuleNotAvailable{"docker", err}
-		sr.Header = fmt.Sprintf("%s: %s\n", utils.Wrap("Docker", c.padL, c.padR), utils.Warn("unavailable"))
+
+		t := GetTableWriter(*c.FixedTableWidth)
+		sr.Content = RenderTable(t, "Docker: " + utils.Warn("Unavailable"))
 	} else {
-		sr.Header, sr.Content, sr.Error = cl.toHeaderContent(c.Ignore, *c.WarnOnly, c.padL, c.padR)
+		sr.Content, sr.Error = cl.getContent(c.Ignore, *c.WarnOnly, *c.FixedTableWidth)
 	}
 }
 

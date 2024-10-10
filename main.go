@@ -14,10 +14,10 @@ import (
 	"github.com/sirupsen/logrus/hooks/writer"
 	"gopkg.in/yaml.v2"
 
-	"github.com/cosandr/go-motd/datasources"
-	"github.com/cosandr/go-motd/utils"
+	"github.com/dkaser/unraid-motd/datasources"
 
 	"golang.org/x/term"
+	"github.com/arsham/figurine/figurine"
 )
 
 var defaultCfgPath = "./config.yaml"
@@ -94,7 +94,6 @@ var args struct {
 	DumpConfig      bool          `arg:"--dump-config" help:"Dump config and exit"`
 	HideUnavailable bool          `arg:"--hide-unavailable,env:HIDE_UNAVAILABLE" help:"Hide unavailable modules"`
 	LogLevel        string        `arg:"--log-level,env:LOG_LEVEL" help:"Set log level"`
-	NoColors        bool          `arg:"--no-colors,env:NO_COLORS" help:"Disable colors"`
 	Output          string        `arg:"-o,--output,env:OUTPUT" help:"Write output to file instead of stdout"`
 	PID             string        `arg:"--pid" help:"Write PID to file or log if '-'"`
 	Quiet           bool          `arg:"-q,--quiet" help:"Don't log to console"`
@@ -159,9 +158,9 @@ func runModules(c *datasources.Conf) {
 		if v.Error != nil {
 			log.Warnf("%s error: %v", k, v.Error)
 		}
-		outStr[k] = v.Header
+
 		if v.Content != "" {
-			outStr[k] += "\n" + v.Content
+			outStr[k] = v.Content
 		}
 	}
 	outBuf := &strings.Builder{}
@@ -208,9 +207,6 @@ func main() {
 	if args.Debug {
 		mainStart = time.Now()
 	}
-	if args.NoColors {
-		utils.NoColors = true
-	}
 	// Read config file
 	c, err := datasources.NewConfFromFile(args.ConfigFile, args.Debug)
 	if err != nil {
@@ -229,6 +225,16 @@ func main() {
 			dumpConfig(&c, "")
 		}
 		return
+	}
+
+	if (c.Header.Show) {
+		if (c.Header.UseHostname) {
+			hostname, _ := os.Hostname()
+			figurine.Write(os.Stdout, hostname, c.Header.Font)
+		} else {
+			figurine.Write(os.Stdout, c.Header.CustomText, c.Header.Font)
+		}
+		fmt.Println("")
 	}
 
 	runModules(&c)

@@ -10,7 +10,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/cosandr/go-motd/utils"
+	"github.com/dkaser/unraid-motd/utils"
+	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/jedib0t/go-pretty/v6/text"
 )
 
 type ConfSysInfo struct {
@@ -19,13 +21,15 @@ type ConfSysInfo struct {
 
 func (c *ConfSysInfo) Init() {
 	c.ConfBase.Init()
-	c.PadHeader = []int{0, 3}
-	c.PadContent = []int{0, 0}
 }
 
 // GetSysInfo various stats about the host Linux OS (kernel, distro, load and more)
 func GetSysInfo(ch chan<- SourceReturn, conf *Conf) {
 	c := conf.SysInfo
+	if c.FixedTableWidth == nil {
+		c.FixedTableWidth = &conf.FixedTableWidth
+	}
+
 	sr := NewSourceReturn(conf.debug)
 	defer func() {
 		ch <- sr.Return(&c.ConfBase)
@@ -34,6 +38,14 @@ func GetSysInfo(ch chan<- SourceReturn, conf *Conf) {
 		name    string
 		content string
 	}
+
+	t := GetTableWriter(*c.FixedTableWidth)
+	t.Style().Options.SeparateColumns = false
+	t.Style().Options.DrawBorder = false
+	t.SetColumnConfigs([]table.ColumnConfig{
+		{Number: 1, Align: text.AlignLeft},
+	})
+
 	// Fetch all the things
 	var info = [...]entry{
 		{"Version", getDistroName()},
@@ -43,8 +55,9 @@ func GetSysInfo(ch chan<- SourceReturn, conf *Conf) {
 		{"RAM", getMemoryInfo()},
 	}
 	for _, e := range info {
-		sr.Header += fmt.Sprintf("%s: %s\n", utils.Wrap(e.name, c.padL, c.padR), e.content)
+		t.AppendRow([]interface{}{e.name, e.content})
 	}
+	sr.Content = RenderTable(t, "")
 }
 
 // runCmd executes command and returns stdout as string

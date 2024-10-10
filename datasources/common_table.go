@@ -8,6 +8,9 @@ import (
 func GetTableWriter(tableWidth int) table.Writer {
     t := table.NewWriter()
 	t.SetStyle(table.StyleLight)
+	t.SetColumnConfigs([]table.ColumnConfig{
+		{Number: 1, Align: text.AlignRight},
+	})
 
 	if(tableWidth > 0) {
 		t.Style().Size = table.SizeOptions{

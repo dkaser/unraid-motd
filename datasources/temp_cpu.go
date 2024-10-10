@@ -8,20 +8,17 @@ import (
 	"github.com/shirou/gopsutil/v3/host"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cosandr/go-motd/utils"
+	"github.com/dkaser/unraid-motd/utils"
 )
 
 // ConfTempCPU extends ConfBase with a list of containers to ignore
 type ConfTempCPU struct {
 	ConfBaseWarn `yaml:",inline"`
-	// Get CPU temperatures by parsing 'sensors -j' output
-	Exec bool `yaml:"use_exec"`
 }
 
 // Init sets up default alignment
 func (c *ConfTempCPU) Init() {
 	c.ConfBaseWarn.Init()
-	c.PadHeader[1] = 2
 }
 
 // GetCPUTemp returns CPU core temps using gopsutil or parsing sensors output
@@ -31,6 +28,10 @@ func GetCPUTemp(ch chan<- SourceReturn, conf *Conf) {
 	if c.WarnOnly == nil {
 		c.WarnOnly = &conf.WarnOnly
 	}
+	if c.FixedTableWidth == nil {
+		c.FixedTableWidth = &conf.FixedTableWidth
+	}
+
 	sr := NewSourceReturn(conf.debug)
 	defer func() {
 		ch <- sr.Return(&c.ConfBase)
@@ -38,23 +39,26 @@ func GetCPUTemp(ch chan<- SourceReturn, conf *Conf) {
 	var tempMap map[string]int
 	var isZen bool
 	var err error
-	if c.Exec {
-		tempMap, isZen, err = cpuTempSensors()
-	} else {
-		tempMap, isZen, err = cpuTempGopsutil()
-	}
+	tempMap, isZen, err = cpuTempGopsutil()
+
 	if err != nil {
 		log.Warnf("[cpu] temperature read error: %v", err)
 	}
+
 	if len(tempMap) == 0 {
 		err = &ModuleNotAvailable{"cpu", err}
-		sr.Header = fmt.Sprintf("%s: %s\n", utils.Wrap("CPU temp", c.padL, c.padR), utils.Warn("unavailable"))
+
+		t := GetTableWriter(*c.FixedTableWidth)
+		sr.Content = RenderTable(t, "CPU Temp: " + utils.Warn("Unavailable"))
 	} else {
-		sr.Header, sr.Content, sr.Error = formatCPUTemps(tempMap, isZen, &c)
+		sr.Content, sr.Error = formatCPUTemps(tempMap, isZen, &c)
 	}
 }
 
-func formatCPUTemps(tempMap map[string]int, isZen bool, c *ConfTempCPU) (header string, content string, err error) {
+func formatCPUTemps(tempMap map[string]int, isZen bool, c *ConfTempCPU) (content string, err error) {
+	t := GetTableWriter(*c.FixedTableWidth)
+	var title string
+
 	// Sort keys
 	sortedNames := make([]string, len(tempMap))
 	i := 0
@@ -69,28 +73,30 @@ func formatCPUTemps(tempMap map[string]int, isZen bool, c *ConfTempCPU) (header 
 		v := tempMap[k]
 		var wrapped string
 		if !isZen {
-			wrapped = utils.Wrap(fmt.Sprintf("Core %s", k), c.padL, c.padR)
+			wrapped = fmt.Sprintf("Core %s", k)
 		} else {
-			wrapped = utils.Wrap(k, c.padL, c.padR)
+			wrapped = k
 		}
 		if v < c.Warn && !*c.WarnOnly {
-			content += fmt.Sprintf("%s: %s\n", wrapped, utils.Good(v))
+			t.AppendRow([]interface{}{wrapped, utils.Good(v)})
 		} else if v >= c.Warn && v < c.Crit {
-			content += fmt.Sprintf("%s: %s\n", wrapped, utils.Warn(v))
+			t.AppendRow([]interface{}{wrapped, utils.Warn(v)})
 			warnCount++
 		} else if v >= c.Crit {
 			warnCount++
 			errCount++
-			content += fmt.Sprintf("%s: %s\n", wrapped, utils.Err(v))
+			t.AppendRow([]interface{}{wrapped, utils.Err(v)})
 		}
 	}
 	if warnCount == 0 {
-		header = fmt.Sprintf("%s: %s\n", utils.Wrap("CPU temp", c.padL, c.padR), utils.Good("OK"))
+		title = fmt.Sprintf("%s: %s", "CPU Temp", utils.Good("OK"))
 	} else if errCount > 0 {
-		header = fmt.Sprintf("%s: %s\n", utils.Wrap("CPU temp", c.padL, c.padR), utils.Err("Critical"))
+		title = fmt.Sprintf("%s: %s", "CPU Temp", utils.Err("Critical"))
 	} else if warnCount > 0 {
-		header = fmt.Sprintf("%s: %s\n", utils.Wrap("CPU temp", c.padL, c.padR), utils.Warn("Warning"))
+		title = fmt.Sprintf("%s: %s", "CPU Temp", utils.Warn("Warning"))
 	}
+
+	content = RenderTable(t, title)
 	return
 }
 

@@ -11,8 +11,6 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
-
-	"github.com/cosandr/go-motd/utils"
 )
 
 type UnavailableError interface {
@@ -33,8 +31,6 @@ func (ModuleNotAvailable) UnavailableError() {}
 
 // SourceReturn is the data returned by a datasource through a channel
 type SourceReturn struct {
-	// Datasource output header string
-	Header string
 	// Datasource output content string
 	Content string
 	// Error
@@ -49,12 +45,7 @@ func (sr *SourceReturn) Return(c *ConfBase) SourceReturn {
 	if !sr.start.IsZero() {
 		sr.Time = time.Since(sr.start)
 	}
-	sr.MaybePad(c)
 	return *sr
-}
-
-func (sr *SourceReturn) MaybePad(c *ConfBase) {
-	sr.Header, sr.Content = c.MaybePad(sr.Header, sr.Content)
 }
 
 func NewSourceReturn(debug bool) *SourceReturn {
@@ -77,36 +68,11 @@ type ConfInterface interface {
 type ConfBase struct {
 	// Override global setting
 	WarnOnly *bool `yaml:"warnings_only,omitempty"`
-	// 2-element array defining padding for header (title)
-	PadHeader []int `yaml:"pad_header,flow"`
-	// 2-element array defining padding for content (details)
-	PadContent []int `yaml:"pad_content,flow"`
-	padL       string
-	padR       string
 	FixedTableWidth *int `yaml:"table_width,omitempty"`
 }
 
-// Init sets `PadHeader` and `PadContent` to [0, 0]
 func (c *ConfBase) Init() {
-	c.PadHeader = []int{0, 0}
-	c.PadContent = []int{1, 0}
-	c.padL = "^L^"
-	c.padR = "^R^"
-}
 
-// MaybePad pads header and content (if they aren't empty strings)
-func (c *ConfBase) MaybePad(header string, content string) (string, string) {
-	var rh string
-	var rc string
-	if len(header) > 0 {
-		p := utils.Pad{Delims: map[string]int{c.padL: c.PadHeader[0], c.padR: c.PadHeader[1]}, Content: header}
-		rh = p.Do()
-	}
-	if len(content) > 0 {
-		p := utils.Pad{Delims: map[string]int{c.padL: c.PadContent[0], c.padR: c.PadContent[1]}, Content: content}
-		rc = p.Do()
-	}
-	return rh, rc
 }
 
 // ConfBaseWarn extends ConfBase with warning and critical values
@@ -136,13 +102,27 @@ type ConfGlobal struct {
 	// Internal variables
 	debug bool
 
-	ShowHeader bool `yaml:"header"`
 	FixedTableWidth int `yaml:"table_width"`
+}
+
+type ConfHeader struct {
+	Show bool `yaml:"show"`
+	UseHostname bool `yaml:"use_hostname"`
+	CustomText string `yaml:"custom_text"`
+	Font string `yaml:"font"`
+}
+
+func (c *ConfHeader) Init() {
+	c.Show = true
+	c.UseHostname = true
+	c.CustomText = "Custom"
+	c.Font = "Banner.flf"
 }
 
 // Conf is the combined config struct, defines YAML file
 type Conf struct {
 	ConfGlobal   `yaml:"global"`
+	Header		 ConfHeader   `yaml:"header"`
 	CPU          ConfTempCPU  `yaml:"cpu"`
 	Docker       ConfDocker   `yaml:"docker"`
 	SysInfo      ConfSysInfo  `yaml:"sysinfo"`
@@ -157,8 +137,8 @@ func (c *Conf) Init() {
 	// Set global defaults
 	c.WarnOnly = true
 	c.ColPad = 4
-	c.ShowHeader = true
 	c.FixedTableWidth = 0
+	c.Header.Init()
 	// Init data source configs
 	c.CPU.Init()
 	c.Docker.Init()

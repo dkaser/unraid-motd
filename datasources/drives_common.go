@@ -2,7 +2,7 @@ package datasources
 
 import (
 	"fmt"
-	"github.com/cosandr/go-motd/utils"
+	"github.com/dkaser/unraid-motd/utils"
 	"github.com/shirou/gopsutil/v3/disk"
 )
 
@@ -14,8 +14,6 @@ type ConfDrives struct {
 func (c *ConfDrives) Init() {
 	// Base init must be called
 	c.ConfBaseWarn.Init()
-	c.PadHeader[1] = 1
-	c.PadContent[1] = 1
 	c.WarnOnly = new(bool)
 }
 
@@ -52,17 +50,6 @@ func formatDriveUsage(c *ConfDrives, percent int) string {
 	} else {
 		return utils.Good(text)
 	}
-}
-
-func getDriveHeader(c *ConfDrives, title string, status string) (header string, err error) {
-	if status == "o" {
-		header = fmt.Sprintf("%s: %s\n", utils.Wrap(title, c.padL, c.padR), utils.Good("OK"))
-	} else if status == "w" {
-		header = fmt.Sprintf("%s: %s\n", utils.Wrap(title, c.padL, c.padR), utils.Warn("Warning"))
-	} else {
-		header = fmt.Sprintf("%s: %s\n", utils.Wrap(title, c.padL, c.padR), utils.Err("Critical"))
-	}
-	return
 }
 
 func getDriveHeaderTable(c *ConfDrives, title string, status string) (header string, err error) {

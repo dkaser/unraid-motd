@@ -1,4 +1,4 @@
-module github.com/cosandr/go-motd
+module github.com/dkaser/unraid-motd
 
 go 1.22
 
@@ -16,6 +16,9 @@ require (
 require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/alexflint/go-scalar v1.2.0 // indirect
+	github.com/arsham/figurine v1.3.0 // indirect
+	github.com/arsham/rainbow v1.2.1 // indirect
+	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/go-connections v0.5.0 // indirect

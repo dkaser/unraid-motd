@@ -2,8 +2,6 @@ package datasources
 
 import (
 	"fmt"
-	"github.com/jedib0t/go-pretty/v6/table"
-	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/shirou/gopsutil/v3/disk"
 	"slices"
 )
@@ -18,15 +16,12 @@ func GetSystemDrives(ch chan<- SourceReturn, conf *Conf) {
 	defer func() {
 		ch <- sr.Return(&c.ConfBase)
 	}()
-	sr.Header, sr.Content, sr.Error = getSystemDriveUsage(&c)
+	sr.Content, sr.Error = getSystemDriveUsage(&c)
 	return
 }
 
-func getSystemDriveUsage(c *ConfDrives) (header string, content string, err error) {
+func getSystemDriveUsage(c *ConfDrives) (content string, err error) {
 	t := GetTableWriter(*c.FixedTableWidth)
-	t.SetColumnConfigs([]table.ColumnConfig{
-		{Number: 1, Align: text.AlignRight},
-	})
 
 	status := "o"
 

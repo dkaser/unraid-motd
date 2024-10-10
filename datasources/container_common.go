@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/cosandr/go-motd/utils"
+	"github.com/dkaser/unraid-motd/utils"
 )
 
 type containerStatus struct {
@@ -19,7 +19,10 @@ type containerList struct {
 	Containers []containerStatus
 }
 
-func (cl *containerList) toHeaderContent(ignoreList []string, warnOnly bool, padL string, padR string) (header string, content string, err error) {
+func (cl *containerList) getContent(ignoreList []string, warnOnly bool, tableWidth int) (content string, err error) {
+	t := GetTableWriter(tableWidth)
+	var title string
+	
 	// Make set of ignored containers
 	var ignoreSet utils.StringSet
 	ignoreSet = ignoreSet.FromList(ignoreList)
@@ -43,22 +46,22 @@ func (cl *containerList) toHeaderContent(ignoreList []string, warnOnly bool, pad
 
 	// Decide what header should be
 	if len(goodCont) == 0 && len(sortedNames) > 0 {
-		header = fmt.Sprintf("%s: %s\n", utils.Wrap(cl.Runtime, padL, padR), utils.Err("critical"))
+		title = fmt.Sprintf("%s: %s", cl.Runtime, utils.Err("Critical"))
 	} else if len(failedCont) == 0 {
-		header = fmt.Sprintf("%s: %s\n", utils.Wrap(cl.Runtime, padL, padR), utils.Good("OK"))
-		if warnOnly {
-			return
-		}
+		title = fmt.Sprintf("%s: %s", cl.Runtime, utils.Good("OK"))
 	} else if len(failedCont) < len(sortedNames) {
-		header = fmt.Sprintf("%s: %s\n", utils.Wrap(cl.Runtime, padL, padR), utils.Warn("warning"))
+		title = fmt.Sprintf("%s: %s", cl.Runtime, utils.Warn("Warning"))
 	}
+
 	// Only print all containers if requested
 	for _, c := range sortedNames {
 		if val, ok := goodCont[c]; ok && !warnOnly {
-			content += fmt.Sprintf("%s: %s\n", utils.Wrap(c, padL, padR), utils.Good(val))
+			t.AppendRow([]interface{}{c, utils.Good(val)})
 		} else if val, ok := failedCont[c]; ok {
-			content += fmt.Sprintf("%s: %s\n", utils.Wrap(c, padL, padR), utils.Err(val))
+			t.AppendRow([]interface{}{c, utils.Err(val)})
 		}
 	}
+
+	content = RenderTable(t, title)
 	return
 }
