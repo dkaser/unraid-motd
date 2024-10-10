@@ -20,49 +20,49 @@ func (c *ConfNet) Init() {
 	c.IPv6 = false
 }
 
-func GetNetworks(ch chan<- SourceReturn, conf *Conf) {
-	c := conf.Networks
-	c.Load(conf)
+func GetNetworks(channel chan<- SourceReturn, conf *Conf) {
+	sourceConf := conf.Networks
+	sourceConf.Load(conf)
 
-	sr := NewSourceReturn(conf.debug)
+	returnData := NewSourceReturn(conf.debug)
 	defer func() {
-		ch <- sr.Return()
+		channel <- returnData.Return()
 	}()
-	sr.Content, sr.Error = getNetworkInterfaces(&c)
+	returnData.Content, returnData.Error = getNetworkInterfaces(&sourceConf)
 }
 
-func getNetworkInterfaces(c *ConfNet) (content string, err error) {
-	t := GetTableWriter(c)
+func getNetworkInterfaces(sourceConf *ConfNet) (content string, err error) {
+	outputTable := GetTableWriter(sourceConf)
 
 	deviceIgnore := []string{"lo", "br-", "veth", "docker0", "vnet0"}
 	nets, err := net.Interfaces()
 
 INTERFACES:
-	for _, n := range nets {
+	for _, net := range nets {
 		for _, s := range deviceIgnore {
-			if strings.Contains(n.Name, s) {
+			if strings.Contains(net.Name, s) {
 				continue INTERFACES
 			}
 		}
 
-		if len(n.Addrs) == 0 {
+		if len(net.Addrs) == 0 {
 			continue
 		}
 
 		addrs := ""
 
-		for _, a := range n.Addrs {
-			if (strings.Contains(a.Addr, ".") && c.IPv4) || (strings.Contains(a.Addr, ":") && c.IPv6) {
-				addrs += a.Addr + "\n"
+		for _, addr := range net.Addrs {
+			if (strings.Contains(addr.Addr, ".") && sourceConf.IPv4) || (strings.Contains(addr.Addr, ":") && sourceConf.IPv6) {
+				addrs += addr.Addr + "\n"
 			}
 		}
 
 		if addrs != "" {
-			t.AppendRow([]interface{}{n.Name, strings.Trim(addrs, "\n")})
+			outputTable.AppendRow([]interface{}{net.Name, strings.Trim(addrs, "\n")})
 		}
 	}
 
-	content = RenderTable(t, "Networks")
+	content = RenderTable(outputTable, "Networks")
 
 	return
 }

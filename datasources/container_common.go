@@ -19,8 +19,8 @@ type containerList struct {
 	Containers []containerStatus
 }
 
-func (cl *containerList) getContent(ignoreList []string, warnOnly bool, c TableConfig) (content string) {
-	t := GetTableWriter(c)
+func (cl *containerList) getContent(ignoreList []string, warnOnly bool, sourceConf TableConfig) (content string) {
+	outputTable := GetTableWriter(sourceConf)
 	var title string
 
 	// Make set of ignored containers
@@ -30,17 +30,17 @@ func (cl *containerList) getContent(ignoreList []string, warnOnly bool, c TableC
 	var goodCont = make(map[string]string)
 	var failedCont = make(map[string]string)
 	var sortedNames []string
-	for _, c := range cl.Containers {
-		if ignoreSet.Contains(c.Name) {
+	for _, container := range cl.Containers {
+		if ignoreSet.Contains(container.Name) {
 			continue
 		}
-		status := strings.ToLower(c.Status)
+		status := strings.ToLower(container.Status)
 		if status == "up" || status == "created" || status == "running" {
-			goodCont[c.Name] = status
+			goodCont[container.Name] = status
 		} else {
-			failedCont[c.Name] = status
+			failedCont[container.Name] = status
 		}
-		sortedNames = append(sortedNames, c.Name)
+		sortedNames = append(sortedNames, container.Name)
 	}
 	sort.Strings(sortedNames)
 
@@ -56,13 +56,13 @@ func (cl *containerList) getContent(ignoreList []string, warnOnly bool, c TableC
 	// Only print all containers if requested
 	for _, c := range sortedNames {
 		if val, ok := goodCont[c]; ok && !warnOnly {
-			t.AppendRow([]interface{}{c, utils.Good(val)})
+			outputTable.AppendRow([]interface{}{c, utils.Good(val)})
 		} else if val, ok := failedCont[c]; ok {
-			t.AppendRow([]interface{}{c, utils.Err(val)})
+			outputTable.AppendRow([]interface{}{c, utils.Err(val)})
 		}
 	}
 
-	content = RenderTable(t, title)
+	content = RenderTable(outputTable, title)
 
 	return
 }

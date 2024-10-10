@@ -6,19 +6,19 @@ import (
 	"slices"
 )
 
-func GetSystemDrives(ch chan<- SourceReturn, conf *Conf) {
-	c := conf.SystemDrives
-	c.Load(conf)
+func GetSystemDrives(channel chan<- SourceReturn, conf *Conf) {
+	sourceConf := conf.SystemDrives
+	sourceConf.Load(conf)
 
-	sr := NewSourceReturn(conf.debug)
+	returnData := NewSourceReturn(conf.debug)
 	defer func() {
-		ch <- sr.Return()
+		channel <- returnData.Return()
 	}()
-	sr.Content, sr.Error = getSystemDriveUsage(&c)
+	returnData.Content, returnData.Error = getSystemDriveUsage(&sourceConf)
 }
 
-func getSystemDriveUsage(c *ConfDrives) (content string, err error) {
-	t := GetTableWriter(*c)
+func getSystemDriveUsage(sourceConf *ConfDrives) (content string, err error) {
+	outputTable := GetTableWriter(*sourceConf)
 
 	status := "o"
 
@@ -30,19 +30,19 @@ func getSystemDriveUsage(c *ConfDrives) (content string, err error) {
 	}
 
 PARTITIONS:
-	for _, p := range parts {
-		if !slices.Contains(getSystemDirs(), p.Mountpoint) {
+	for _, partition := range parts {
+		if !slices.Contains(getSystemDirs(), partition.Mountpoint) {
 			continue PARTITIONS
 		}
 
-		newStatus, percent, used, total := processDrive(c, p.Mountpoint, status)
+		newStatus, percent, used, total := processDrive(sourceConf, partition.Mountpoint, status)
 		status = newStatus
-		if (percent >= c.Warn) || (!*c.WarnOnly) {
-			t.AppendRow([]interface{}{p.Mountpoint, formatDriveUsage(c, percent), fmt.Sprintf("%s %s %s", used, "used out of", total)})
+		if (percent >= sourceConf.Warn) || (!*sourceConf.WarnOnly) {
+			outputTable.AppendRow([]interface{}{partition.Mountpoint, formatDriveUsage(sourceConf, percent), fmt.Sprintf("%s %s %s", used, "used out of", total)})
 		}
 	}
 
-	content = RenderTable(t, getDriveHeaderTable("System Drives", status))
+	content = RenderTable(outputTable, getDriveHeaderTable("System Drives", status))
 
 	return
 }

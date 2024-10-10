@@ -25,21 +25,21 @@ func (c *ConfSysInfo) Init() {
 }
 
 // GetSysInfo various stats about the host Linux OS (kernel, distro, load and more)
-func GetSysInfo(ch chan<- SourceReturn, conf *Conf) {
-	c := conf.SysInfo
-	c.Load(conf)
+func GetSysInfo(channel chan<- SourceReturn, conf *Conf) {
+	sourceConf := conf.SysInfo
+	sourceConf.Load(conf)
 
-	sr := NewSourceReturn(conf.debug)
+	returnData := NewSourceReturn(conf.debug)
 	defer func() {
-		ch <- sr.Return()
+		channel <- returnData.Return()
 	}()
 	type entry struct {
 		name    string
 		content string
 	}
 
-	t := GetTableWriter(c)
-	t.SetColumnConfigs([]table.ColumnConfig{
+	outputTable := GetTableWriter(sourceConf)
+	outputTable.SetColumnConfigs([]table.ColumnConfig{
 		{Number: 1, Align: text.AlignLeft},
 	})
 
@@ -52,9 +52,9 @@ func GetSysInfo(ch chan<- SourceReturn, conf *Conf) {
 		{"RAM", getMemoryInfo()},
 	}
 	for _, e := range info {
-		t.AppendRow([]interface{}{e.name, e.content})
+		outputTable.AppendRow([]interface{}{e.name, e.content})
 	}
-	sr.Content = RenderTable(t, "")
+	returnData.Content = RenderTable(outputTable, "")
 }
 
 // runCmd executes command and returns stdout as string
@@ -70,7 +70,7 @@ func runCmd(name string, args string, buf *bytes.Buffer) (string, error) {
 	}
 	buf.Reset()
 
-	return retStr, fmt.Errorf("failed to run command: %v", err)
+	return retStr, CommandFailedError(fmt.Sprint(err))
 }
 
 func getDistroName() (retStr string) {

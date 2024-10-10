@@ -69,13 +69,13 @@ func NewConfFromFile(path string, debug bool) (c Conf, err error) {
 		return
 	}
 	if errF != nil {
-		err = fmt.Errorf("config file error: %v ", errF)
+		err = ConfigFileError(errF.Error())
 
 		return
 	}
 	err = yaml.Unmarshal(yamlFile, &c)
 	if err != nil {
-		err = fmt.Errorf("cannot parse %s: %v", path, err)
+		err = ParseError(fmt.Sprintf("%s: %v", path, err))
 
 		return
 	}
@@ -84,41 +84,41 @@ func NewConfFromFile(path string, debug bool) (c Conf, err error) {
 }
 
 // RunSources runs data sources in runList, the names are validated and returned as the first value
-func RunSources(runList []string, c *Conf) ([]string, map[string]SourceReturn) {
+func RunSources(runList []string, conf *Conf) ([]string, map[string]SourceReturn) {
 	channels := make(map[string]chan SourceReturn)
 	out := make(map[string]SourceReturn)
 	var validRuns []string
 	// Start goroutines
 Loop:
-	for _, k := range runList {
-		ch := make(chan SourceReturn, 1)
-		switch k {
+	for _, source := range runList {
+		channel := make(chan SourceReturn, 1)
+		switch source {
 		case "cpu":
-			go GetCPUTemp(ch, c)
+			go GetCPUTemp(channel, conf)
 		case "docker":
-			go GetDocker(ch, c)
+			go GetDocker(channel, conf)
 		case "sysinfo":
-			go GetSysInfo(ch, c)
+			go GetSysInfo(channel, conf)
 		case "user-drives":
-			go GetUserDrives(ch, c)
+			go GetUserDrives(channel, conf)
 		case "system-drives":
-			go GetSystemDrives(ch, c)
+			go GetSystemDrives(channel, conf)
 		case "networks":
-			go GetNetworks(ch, c)
+			go GetNetworks(channel, conf)
 		case "services":
-			go GetServices(ch, c)
+			go GetServices(channel, conf)
 		default:
-			log.Warnf("no data source named %s", k)
+			log.Warnf("no data source named %s", source)
 
 			continue Loop
 		}
-		channels[k] = ch
-		validRuns = append(validRuns, k)
+		channels[source] = channel
+		validRuns = append(validRuns, source)
 	}
 	// Wait for results
 	log.Debug("Wait for goroutines")
-	for k := range channels {
-		out[k] = <-channels[k]
+	for source := range channels {
+		out[source] = <-channels[source]
 	}
 
 	return validRuns, out

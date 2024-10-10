@@ -22,13 +22,13 @@ func (c *ConfTempCPU) Init() {
 }
 
 // GetCPUTemp returns CPU core temps using gopsutil or parsing sensors output
-func GetCPUTemp(ch chan<- SourceReturn, conf *Conf) {
-	c := conf.CPU
-	c.Load(conf)
+func GetCPUTemp(channel chan<- SourceReturn, conf *Conf) {
+	sourceConf := conf.CPU
+	sourceConf.Load(conf)
 
-	sr := NewSourceReturn(conf.debug)
+	returnData := NewSourceReturn(conf.debug)
 	defer func() {
-		ch <- sr.Return()
+		channel <- returnData.Return()
 	}()
 	var tempMap map[string]int
 	var isZen bool
@@ -40,44 +40,44 @@ func GetCPUTemp(ch chan<- SourceReturn, conf *Conf) {
 	}
 
 	if len(tempMap) == 0 {
-		t := GetTableWriter(c)
-		sr.Content = RenderTable(t, "CPU Temp: "+utils.Warn("Unavailable"))
+		outputTable := GetTableWriter(sourceConf)
+		returnData.Content = RenderTable(outputTable, "CPU Temp: "+utils.Warn("Unavailable"))
 	} else {
-		sr.Content = formatCPUTemps(tempMap, isZen, &c)
+		returnData.Content = formatCPUTemps(tempMap, isZen, &sourceConf)
 	}
 }
 
-func formatCPUTemps(tempMap map[string]int, isZen bool, c *ConfTempCPU) (content string) {
-	t := GetTableWriter(c)
+func formatCPUTemps(tempMap map[string]int, isZen bool, sourceConf *ConfTempCPU) (content string) {
+	outputTable := GetTableWriter(sourceConf)
 	var title string
 
 	// Sort keys
 	sortedNames := make([]string, len(tempMap))
 	i := 0
-	for k := range tempMap {
-		sortedNames[i] = k
+	for core := range tempMap {
+		sortedNames[i] = core
 		i++
 	}
 	sort.Strings(sortedNames)
 	var warnCount int
 	var errCount int
-	for _, k := range sortedNames {
-		v := tempMap[k]
+	for _, core := range sortedNames {
+		coreTemp := tempMap[core]
 		var wrapped string
 		if !isZen {
-			wrapped = fmt.Sprintf("Core %s", k)
+			wrapped = fmt.Sprintf("Core %s", core)
 		} else {
-			wrapped = k
+			wrapped = core
 		}
-		if v < c.Warn && !*c.WarnOnly {
-			t.AppendRow([]interface{}{wrapped, utils.Good(v)})
-		} else if v >= c.Warn && v < c.Crit {
-			t.AppendRow([]interface{}{wrapped, utils.Warn(v)})
+		if coreTemp < sourceConf.Warn && !*sourceConf.WarnOnly {
+			outputTable.AppendRow([]interface{}{wrapped, utils.Good(coreTemp)})
+		} else if coreTemp >= sourceConf.Warn && coreTemp < sourceConf.Crit {
+			outputTable.AppendRow([]interface{}{wrapped, utils.Warn(coreTemp)})
 			warnCount++
-		} else if v >= c.Crit {
+		} else if coreTemp >= sourceConf.Crit {
 			warnCount++
 			errCount++
-			t.AppendRow([]interface{}{wrapped, utils.Err(v)})
+			outputTable.AppendRow([]interface{}{wrapped, utils.Err(coreTemp)})
 		}
 	}
 	if warnCount == 0 {
@@ -88,7 +88,7 @@ func formatCPUTemps(tempMap map[string]int, isZen bool, c *ConfTempCPU) (content
 		title = fmt.Sprintf("%s: %s", "CPU Temp", utils.Warn("Warning"))
 	}
 
-	content = RenderTable(t, title)
+	content = RenderTable(outputTable, title)
 
 	return
 }

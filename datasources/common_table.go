@@ -10,35 +10,35 @@ type TableConfig interface {
 	GetTableWidth() int
 }
 
-func GetTableWriter(c TableConfig) table.Writer {
-	t := table.NewWriter()
-	t.SetStyle(table.StyleLight)
-	t.SetColumnConfigs([]table.ColumnConfig{
+func GetTableWriter(tableConf TableConfig) table.Writer {
+	outputTable := table.NewWriter()
+	outputTable.SetStyle(table.StyleLight)
+	outputTable.SetColumnConfigs([]table.ColumnConfig{
 		{Number: 1, Align: text.AlignRight},
 	})
 
-	if c.GetTableWidth() > 0 {
-		t.Style().Size = table.SizeOptions{
-			WidthMin: c.GetTableWidth(),
-			WidthMax: c.GetTableWidth(),
+	if tableConf.GetTableWidth() > 0 {
+		outputTable.Style().Size = table.SizeOptions{
+			WidthMin: tableConf.GetTableWidth(),
+			WidthMax: tableConf.GetTableWidth(),
 		}
 	}
 
-	t.Style().Options.SeparateColumns = c.GetBorder()
-	t.Style().Options.DrawBorder = c.GetBorder()
+	outputTable.Style().Options.SeparateColumns = tableConf.GetBorder()
+	outputTable.Style().Options.DrawBorder = tableConf.GetBorder()
 
-	return t
+	return outputTable
 }
 
-func RenderTable(t table.Writer, title string) string {
-	if t.Length() == 0 {
-		t.AppendRow([]interface{}{title})
-		t.SetColumnConfigs([]table.ColumnConfig{
+func RenderTable(outputTable table.Writer, title string) string {
+	if outputTable.Length() == 0 {
+		outputTable.AppendRow([]interface{}{title})
+		outputTable.SetColumnConfigs([]table.ColumnConfig{
 			{Number: 1, Align: text.AlignLeft},
 		})
 	} else {
-		t.SetTitle(title)
+		outputTable.SetTitle(title)
 	}
 
-	return t.Render()
+	return outputTable.Render()
 }

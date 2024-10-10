@@ -128,37 +128,31 @@ func setupLogging() {
 	}
 }
 
-func runModules(c *datasources.Conf) {
-	outOrder, outData := datasources.RunSources(makePrintOrder(c), c)
+func runModules(conf *datasources.Conf) {
+	outOrder, outData := datasources.RunSources(makePrintOrder(conf), conf)
 	outStr := make(map[string]string)
 	// Wait and save results
-	for _, k := range outOrder {
-		v, ok := outData[k]
+	for _, source := range outOrder {
+		sourceData, ok := outData[source]
 		if !ok {
 			continue
 		}
 		// Check if we should skip due to unavailable error
-		if _, unOK := v.Error.(datasources.UnavailableError); unOK && args.HideUnavailable {
+		if _, unOK := sourceData.Error.(datasources.UnavailableError); unOK && args.HideUnavailable {
 			continue
 		}
-		if v.Error != nil {
-			log.Warnf("%s error: %v", k, v.Error)
+		if sourceData.Error != nil {
+			log.Warnf("%s error: %v", source, sourceData.Error)
 		}
 
-		if v.Content != "" {
-			outStr[k] = v.Content
+		if sourceData.Content != "" {
+			outStr[source] = sourceData.Content
 		}
 	}
 	outBuf := &strings.Builder{}
-	if len(c.ColDef) > 0 {
-		log.Debug("Format as table")
-		mapToTable(outBuf, outStr, c.ColDef, c.ColPad)
-	} else {
-		log.Debug("Print as is")
-		for _, k := range outOrder {
-			_, _ = fmt.Fprintln(outBuf, outStr[k])
-		}
-	}
+
+	mapToTable(outBuf, outStr, conf.ColDef, conf.ColPad)
+
 	fmt.Print(outBuf.String())
 
 	// Show timing results
@@ -188,33 +182,33 @@ func main() {
 		mainStart = time.Now()
 	}
 	// Read config file
-	c, err := datasources.NewConfFromFile(args.ConfigFile, args.Debug)
+	conf, err := datasources.NewConfFromFile(args.ConfigFile, args.Debug)
 	if err != nil {
 		log.Warn(err)
 	}
 
-	if c.FixedTableWidth > width {
-		c.FixedTableWidth = width
+	if conf.FixedTableWidth > width {
+		conf.FixedTableWidth = width
 	}
 
 	if args.DumpConfig {
 		log.Info("Dumping config")
 		if flag.NArg() > 0 {
-			dumpConfig(&c, flag.Arg(0))
+			dumpConfig(&conf, flag.Arg(0))
 		} else {
-			dumpConfig(&c, "")
+			dumpConfig(&conf, "")
 		}
 
 		return
 	}
 
-	if c.Header.Show {
-		text := c.Header.CustomText
-		if c.Header.UseHostname {
+	if conf.Header.Show {
+		text := conf.Header.CustomText
+		if conf.Header.UseHostname {
 			text, _ = os.Hostname()
 		}
 
-		err := figurine.Write(os.Stdout, text, c.Header.Font)
+		err := figurine.Write(os.Stdout, text, conf.Header.Font)
 		if err != nil {
 			log.Debug(err.Error())
 		}
@@ -222,7 +216,7 @@ func main() {
 		fmt.Println("")
 	}
 
-	runModules(&c)
+	runModules(&conf)
 
 	// Show timing results
 	if args.Debug {
@@ -231,14 +225,14 @@ func main() {
 }
 
 func dumpConfig(c *datasources.Conf, writeFile string) {
-	d, err := yaml.Marshal(c)
+	configDump, err := yaml.Marshal(c)
 	if err != nil {
 		log.Errorf("Config parse error: %v", err)
 
 		return
 	}
 	if writeFile != "" {
-		err = os.WriteFile(writeFile, d, 0600)
+		err = os.WriteFile(writeFile, configDump, 0600)
 		if err != nil {
 			log.Errorf("Config dumped failed: %v", err)
 
@@ -246,6 +240,6 @@ func dumpConfig(c *datasources.Conf, writeFile string) {
 		}
 		log.Infof("Config dumped to: %s", writeFile)
 	} else {
-		fmt.Printf("%s\n", string(d))
+		fmt.Printf("%s\n", string(configDump))
 	}
 }

@@ -21,18 +21,18 @@ func getSystemDirs() []string {
 	return []string{"/var/log", "/boot", "/var/lib/docker"}
 }
 
-func processDrive(c *ConfDrives, mountpoint string, status string) (newStatus string, percent int, used string, total string) {
+func processDrive(sourceConf *ConfDrives, mountpoint string, status string) (newStatus string, percent int, used string, total string) {
 	diskUsage, _ := disk.Usage(mountpoint)
 
 	used = utils.FormatBytes(float64(diskUsage.Used))
 	total = utils.FormatBytes(float64(diskUsage.Total))
 	percent = int(diskUsage.UsedPercent)
 
-	if percent >= c.Warn && percent < c.Crit {
+	if percent >= sourceConf.Warn && percent < sourceConf.Crit {
 		if status != "e" {
 			status = "w"
 		}
-	} else if percent >= c.Crit {
+	} else if percent >= sourceConf.Crit {
 		status = "e"
 	}
 
@@ -41,12 +41,12 @@ func processDrive(c *ConfDrives, mountpoint string, status string) (newStatus st
 	return
 }
 
-func formatDriveUsage(c *ConfDrives, percent int) string {
+func formatDriveUsage(sourceConf *ConfDrives, percent int) string {
 	text := fmt.Sprintf("%d%%", percent)
 
-	if percent >= c.Warn && percent < c.Crit {
+	if percent >= sourceConf.Warn && percent < sourceConf.Crit {
 		return utils.Warn(text)
-	} else if percent >= c.Crit {
+	} else if percent >= sourceConf.Crit {
 		return utils.Err(text)
 	}
 

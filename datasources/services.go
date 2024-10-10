@@ -25,39 +25,39 @@ func (c *ConfServices) Init() {
 	}
 }
 
-func GetServices(ch chan<- SourceReturn, conf *Conf) {
-	c := conf.Services
-	c.Load(conf)
+func GetServices(channel chan<- SourceReturn, conf *Conf) {
+	sourceConf := conf.Services
+	sourceConf.Load(conf)
 
-	sr := NewSourceReturn(conf.debug)
+	returnData := NewSourceReturn(conf.debug)
 	defer func() {
-		ch <- sr.Return()
+		channel <- returnData.Return()
 	}()
-	sr.Content = getServiceStatus(&c)
+	returnData.Content = getServiceStatus(&sourceConf)
 }
 
-func getServiceStatus(c *ConfServices) (content string) {
-	t := GetTableWriter(c)
+func getServiceStatus(sourceConf *ConfServices) (content string) {
+	outputTable := GetTableWriter(sourceConf)
 
 	overall := utils.Good("OK")
 
 	//SERVICES:
-	for _, s := range c.Services {
+	for _, service := range sourceConf.Services {
 		reg := regexp.MustCompile(`[^a-zA-Z0-9\-_]+`)
-		s = reg.ReplaceAllString(s, "")
+		service = reg.ReplaceAllString(service, "")
 
-		cmd := exec.Command("/etc/rc.d/rc."+s, "status") // #nosec G204
+		cmd := exec.Command("/etc/rc.d/rc."+service, "status") // #nosec G204
 		err := cmd.Run()
 
 		if err != nil {
 			overall = utils.Err("Critical")
-			t.AppendRow([]interface{}{s, utils.Err("Not running")})
-		} else if !*c.WarnOnly {
-			t.AppendRow([]interface{}{s, utils.Good("Running")})
+			outputTable.AppendRow([]interface{}{service, utils.Err("Not running")})
+		} else if !*sourceConf.WarnOnly {
+			outputTable.AppendRow([]interface{}{service, utils.Good("Running")})
 		}
 	}
 
-	content = RenderTable(t, "Services: "+overall)
+	content = RenderTable(outputTable, "Services: "+overall)
 
 	return
 }
