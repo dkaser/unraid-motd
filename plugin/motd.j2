@@ -20,7 +20,7 @@ For older releases, see https://github.com/{{ githubRepository }}/releases
 ]]>
 </CHANGES>
 
-<FILE Name="{{ configDirectory }}/unraid-motd-{{ version }}-amd64-1.txz">
+<FILE Name="{{ configDirectory }}/unraid-motd-{{ version }}-amd64-1.txz" Run="upgradepkg --install-new">
 <URL>https://github.com/{{ githubRepository }}/releases/download/{{ version }}/unraid-motd-{{ version }}-amd64-1.txz</URL>
 <SHA256>{{ checksum }}</SHA256>
 </FILE>
