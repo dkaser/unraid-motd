@@ -24,13 +24,7 @@ func (c *ConfTempCPU) Init() {
 // GetCPUTemp returns CPU core temps using gopsutil or parsing sensors output
 func GetCPUTemp(ch chan<- SourceReturn, conf *Conf) {
 	c := conf.CPU
-	// Check for warnOnly override
-	if c.WarnOnly == nil {
-		c.WarnOnly = &conf.WarnOnly
-	}
-	if c.FixedTableWidth == nil {
-		c.FixedTableWidth = &conf.FixedTableWidth
-	}
+	c.Load(conf)
 
 	sr := NewSourceReturn(conf.debug)
 	defer func() {
@@ -48,7 +42,7 @@ func GetCPUTemp(ch chan<- SourceReturn, conf *Conf) {
 	if len(tempMap) == 0 {
 		err = &ModuleNotAvailable{"cpu", err}
 
-		t := GetTableWriter(*c.FixedTableWidth)
+		t := GetTableWriter(c)
 		sr.Content = RenderTable(t, "CPU Temp: " + utils.Warn("Unavailable"))
 	} else {
 		sr.Content, sr.Error = formatCPUTemps(tempMap, isZen, &c)
@@ -56,7 +50,7 @@ func GetCPUTemp(ch chan<- SourceReturn, conf *Conf) {
 }
 
 func formatCPUTemps(tempMap map[string]int, isZen bool, c *ConfTempCPU) (content string, err error) {
-	t := GetTableWriter(*c.FixedTableWidth)
+	t := GetTableWriter(c)
 	var title string
 
 	// Sort keys

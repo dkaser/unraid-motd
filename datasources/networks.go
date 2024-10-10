@@ -23,9 +23,7 @@ func (c *ConfNet) Init() {
 
 func GetNetworks(ch chan<- SourceReturn, conf *Conf) {
 	c := conf.Networks
-	if c.FixedTableWidth == nil {
-		c.FixedTableWidth = &conf.FixedTableWidth
-	}
+	c.Load(conf)
 
 	sr := NewSourceReturn(conf.debug)
 	defer func() {
@@ -36,7 +34,7 @@ func GetNetworks(ch chan<- SourceReturn, conf *Conf) {
 }
 
 func getNetworkInterfaces(c *ConfNet) (content string, err error) {
-	t := GetTableWriter(*c.FixedTableWidth)
+	t := GetTableWriter(c)
 
 	deviceIgnore := []string{"lo", "br-", "veth", "docker0", "vnet0"}
 	nets, err := net.Interfaces()

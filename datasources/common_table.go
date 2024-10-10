@@ -5,19 +5,28 @@ import (
 	"github.com/jedib0t/go-pretty/v6/text"
 )
 
-func GetTableWriter(tableWidth int) table.Writer {
+type TableConfig interface {
+    GetBorder() bool
+	GetTableWidth() int
+}
+
+func GetTableWriter(c TableConfig) table.Writer {
     t := table.NewWriter()
 	t.SetStyle(table.StyleLight)
 	t.SetColumnConfigs([]table.ColumnConfig{
 		{Number: 1, Align: text.AlignRight},
 	})
 
-	if(tableWidth > 0) {
+	if(c.GetTableWidth() > 0) {
 		t.Style().Size = table.SizeOptions{
-			WidthMin: tableWidth,
-			WidthMax: tableWidth,
+			WidthMin: c.GetTableWidth(),
+			WidthMax: c.GetTableWidth(),
 		}
 	}
+
+	t.Style().Options.SeparateColumns = c.GetBorder()
+	t.Style().Options.DrawBorder = c.GetBorder()
+
 	return t
 }
 

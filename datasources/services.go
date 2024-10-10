@@ -7,7 +7,7 @@ import (
 
 type ConfServices struct {
 	ConfBase `yaml:",inline"`
-	Services []string `yaml:"pad_header,flow"`
+	Services []string `yaml:"monitor,flow"`
 }
 
 // Init is mandatory
@@ -26,9 +26,7 @@ func (c *ConfServices) Init() {
 
 func GetServices(ch chan<- SourceReturn, conf *Conf) {
 	c := conf.Services
-	if c.FixedTableWidth == nil {
-		c.FixedTableWidth = &conf.FixedTableWidth
-	}
+	c.Load(conf)
 
 	sr := NewSourceReturn(conf.debug)
 	defer func() {
@@ -39,7 +37,7 @@ func GetServices(ch chan<- SourceReturn, conf *Conf) {
 }
 
 func getServiceStatus(c *ConfServices) (content string, err error) {
-	t := GetTableWriter(*c.FixedTableWidth)
+	t := GetTableWriter(c)
 
 	overall := utils.Good("OK")
 
@@ -48,16 +46,12 @@ func getServiceStatus(c *ConfServices) (content string, err error) {
 		cmd := exec.Command("/etc/rc.d/rc."+s, "status")
 		err := cmd.Run()
 
-		var status string
-
 		if err != nil {
-			status = utils.Err("Not running")
 			overall = utils.Err("Critical")
-		} else {
-			status = utils.Good("Running")
+			t.AppendRow([]interface{}{s, utils.Err("Not running")})
+		} else if (! *c.WarnOnly) {
+			t.AppendRow([]interface{}{s, utils.Good("Running")})
 		}
-
-		t.AppendRow([]interface{}{s, status})
 	}
 
 	content = RenderTable(t, "Services: " + overall)

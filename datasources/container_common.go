@@ -19,8 +19,8 @@ type containerList struct {
 	Containers []containerStatus
 }
 
-func (cl *containerList) getContent(ignoreList []string, warnOnly bool, tableWidth int) (content string, err error) {
-	t := GetTableWriter(tableWidth)
+func (cl *containerList) getContent(ignoreList []string, warnOnly bool, c TableConfig) (content string, err error) {
+	t := GetTableWriter(c)
 	var title string
 	
 	// Make set of ignored containers

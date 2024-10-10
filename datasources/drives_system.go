@@ -8,9 +8,7 @@ import (
 
 func GetSystemDrives(ch chan<- SourceReturn, conf *Conf) {
 	c := conf.SystemDrives
-	if c.FixedTableWidth == nil {
-		c.FixedTableWidth = &conf.FixedTableWidth
-	}
+	c.Load(conf)
 
 	sr := NewSourceReturn(conf.debug)
 	defer func() {
@@ -21,7 +19,7 @@ func GetSystemDrives(ch chan<- SourceReturn, conf *Conf) {
 }
 
 func getSystemDriveUsage(c *ConfDrives) (content string, err error) {
-	t := GetTableWriter(*c.FixedTableWidth)
+	t := GetTableWriter(*c)
 
 	status := "o"
 

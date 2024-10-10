@@ -9,9 +9,7 @@ import (
 
 func GetUserDrives(ch chan<- SourceReturn, conf *Conf) {
 	c := conf.UserDrives
-	if c.FixedTableWidth == nil {
-		c.FixedTableWidth = &conf.FixedTableWidth
-	}
+	c.Load(conf)
 
 	sr := NewSourceReturn(conf.debug)
 	defer func() {
@@ -22,7 +20,7 @@ func GetUserDrives(ch chan<- SourceReturn, conf *Conf) {
 }
 
 func getUserDriveUsage(c *ConfDrives) (content string, err error) {
-	t := GetTableWriter(*c.FixedTableWidth)
+	t := GetTableWriter(c)
 
 	deviceIgnore := []string{"docker/", "shfs", "nfsd", "nsfs", "/loop"}
 	allowedFs := []string{"vfat", "xfs", "btrfs", "zfs"}

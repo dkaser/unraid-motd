@@ -21,7 +21,6 @@ import (
 )
 
 var defaultCfgPath = "./config.yaml"
-var defaultOrder = []string{"sysinfo", "cpu", "docker", "user-drives", "system-drives", "networks", "services"}
 
 func makeTable(buf *strings.Builder, padding int) (table *tablewriter.Table) {
 	table = tablewriter.NewWriter(buf)
@@ -70,20 +69,13 @@ func mapToTable(buf *strings.Builder, inStr map[string]string, colDef [][]string
 
 // makePrintOrder flattens colDef (if present). If showOrder is defined as well, it is ignored.
 func makePrintOrder(c *datasources.Conf) (printOrder []string) {
-	if len(c.ColDef) > 0 {
-		// Flatten 2-dim input
-		for _, row := range c.ColDef {
-			for _, k := range row {
-				printOrder = append(printOrder, k)
-			}
+	// Flatten 2-dim input
+	for _, row := range c.ColDef {
+		for _, k := range row {
+			printOrder = append(printOrder, k)
 		}
-	} else if len(c.ShowOrder) > 0 {
-		printOrder = c.ShowOrder
-	} else {
-		// Use default order
-		printOrder = make([]string, len(defaultOrder))
-		copy(printOrder, defaultOrder)
 	}
+
 	return
 }
 

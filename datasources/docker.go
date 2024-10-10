@@ -18,24 +18,19 @@ const (
 type ConfDocker struct {
 	ConfBase `yaml:",inline"`
 	// List of container names to ignore
-	Ignore []string `yaml:"ignore,omitempty"`
+	Ignore []string `yaml:"ignore"`
 }
 
 // Init sets up default alignment
 func (c *ConfDocker) Init() {
 	c.ConfBase.Init()
+	c.Ignore = []string{}
 }
 
 // GetDocker docker container status using the API
 func GetDocker(ch chan<- SourceReturn, conf *Conf) {
 	c := conf.Docker
-	// Check for warnOnly override
-	if c.WarnOnly == nil {
-		c.WarnOnly = &conf.WarnOnly
-	}
-	if c.FixedTableWidth == nil {
-		c.FixedTableWidth = &conf.FixedTableWidth
-	}
+	c.Load(conf)
 
 	sr := NewSourceReturn(conf.debug)
 	defer func() {
@@ -48,10 +43,10 @@ func GetDocker(ch chan<- SourceReturn, conf *Conf) {
 	if err != nil {
 		err = &ModuleNotAvailable{"docker", err}
 
-		t := GetTableWriter(*c.FixedTableWidth)
+		t := GetTableWriter(c)
 		sr.Content = RenderTable(t, "Docker: " + utils.Warn("Unavailable"))
 	} else {
-		sr.Content, sr.Error = cl.getContent(c.Ignore, *c.WarnOnly, *c.FixedTableWidth)
+		sr.Content, sr.Error = cl.getContent(c.Ignore, *c.WarnOnly, c)
 	}
 }
 

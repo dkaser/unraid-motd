@@ -21,14 +21,13 @@ type ConfSysInfo struct {
 
 func (c *ConfSysInfo) Init() {
 	c.ConfBase.Init()
+	c.Border = new(bool)
 }
 
 // GetSysInfo various stats about the host Linux OS (kernel, distro, load and more)
 func GetSysInfo(ch chan<- SourceReturn, conf *Conf) {
 	c := conf.SysInfo
-	if c.FixedTableWidth == nil {
-		c.FixedTableWidth = &conf.FixedTableWidth
-	}
+	c.Load(conf)
 
 	sr := NewSourceReturn(conf.debug)
 	defer func() {
@@ -39,9 +38,7 @@ func GetSysInfo(ch chan<- SourceReturn, conf *Conf) {
 		content string
 	}
 
-	t := GetTableWriter(*c.FixedTableWidth)
-	t.Style().Options.SeparateColumns = false
-	t.Style().Options.DrawBorder = false
+	t := GetTableWriter(c)
 	t.SetColumnConfigs([]table.ColumnConfig{
 		{Number: 1, Align: text.AlignLeft},
 	})
