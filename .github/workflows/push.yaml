@@ -1,0 +1,25 @@
+name: Go
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Install dependencies
+        run: go get .
+      - name: Build
+        run: |
+          mkdir build
+          go build -o build/motd
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: |
+            build
