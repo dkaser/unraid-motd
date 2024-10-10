@@ -4,25 +4,25 @@
 <PLUGIN 
   name="motd"
   author="Derek Kaser"
-  version="0.1.1"
-  pluginURL="https://raw.githubusercontent.com/dkaser/motd/main/plugin/motd.plg"
-  support="https://github.com/dkaser/motd/issues"
+  version="0.1.2"
+  pluginURL="https://raw.githubusercontent.com/dkaser/unraid-motd/main/plugin/motd.plg"
+  support="https://github.com/dkaser/unraid-motd/issues"
   min="6.11.5"
   icon="fa-wrench"
 >
 
 <CHANGES>
 <![CDATA[
-###0.1.1###
+###0.1.2###
 Test release
 
-For older releases, see https://github.com/dkaser/motd/releases
+For older releases, see https://github.com/dkaser/unraid-motd/releases
 ]]>
 </CHANGES>
 
-<FILE Name="/boot/config/plugins/motd/unraid-motd-0.1.1-amd64-1.txz">
-<URL>https://github.com/dkaser/motd/releases/download/0.1.1/unraid-motd-0.1.1-amd64-1.txz</URL>
-<SHA256>2e54bc5b4c5a04b80f5ba92564d723ebb72946ad368c039490d8c75b490d756f</SHA256>
+<FILE Name="/boot/config/plugins/motd/unraid-motd-0.1.2-amd64-1.txz">
+<URL>https://github.com/dkaser/unraid-motd/releases/download/0.1.2/unraid-motd-0.1.2-amd64-1.txz</URL>
+<SHA256>f3282d7123d0ecf766bd8af852b7812ee0647b370e3a4d906a1b1edd3c26abc2</SHA256>
 </FILE>
 
 <!--
@@ -33,12 +33,12 @@ The 'install' script.
 <![CDATA[
 
 # cleanup old versions
-rm -f $(ls /boot/config/plugins/motd/unraid-motd-*.txz 2>/dev/null | grep -v '0.1.1')
+rm -f $(ls /boot/config/plugins/motd/unraid-motd-*.txz 2>/dev/null | grep -v '0.1.2')
 
 echo ""
 echo "----------------------------------------------------"
 echo " motd has been installed."
-echo " Version: 0.1.1"
+echo " Version: 0.1.2"
 echo "----------------------------------------------------"
 echo ""
 ]]>
