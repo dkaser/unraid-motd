@@ -3,5 +3,7 @@
     "githubRepository": "dkaser/unraid-motd",
     "pluginDirectory": "/usr/local/emhttp/plugins/motd",
     "configDirectory": "/boot/config/plugins/motd",
+    "figurineVersion": "v1.3.0",
+    "figurineSHA256": "e72430de0ca4b4b4548495d803856f5fec223f43c59a97a0bfcc714710d5032a",
     "minver": "6.11.5"
 }
