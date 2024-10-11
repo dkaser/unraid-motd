@@ -4,7 +4,7 @@
 <PLUGIN 
   name="motd"
   author="Derek Kaser"
-  version="0.1.4"
+  version="0.1.5"
   pluginURL="https://raw.githubusercontent.com/dkaser/unraid-motd/main/plugin/motd.plg"
   support="https://github.com/dkaser/unraid-motd/issues"
   min="6.11.5"
@@ -13,16 +13,21 @@
 
 <CHANGES>
 <![CDATA[
-###0.1.4###
+###0.1.5###
 Test release
 
 For older releases, see https://github.com/dkaser/unraid-motd/releases
 ]]>
 </CHANGES>
 
-<FILE Name="/boot/config/plugins/motd/unraid-motd-0.1.4-amd64-1.txz" Run="upgradepkg --install-new">
-<URL>https://github.com/dkaser/unraid-motd/releases/download/0.1.4/unraid-motd-0.1.4-amd64-1.txz</URL>
-<SHA256>4bd76c390909734a71154c701bc80586f87fe32baa2fab5a87282d6e9eecc2ec</SHA256>
+<FILE Name="/boot/config/plugins/motd/unraid-motd-0.1.5-amd64-1.txz" Run="upgradepkg --install-new">
+<URL>https://github.com/dkaser/unraid-motd/releases/download/0.1.5/unraid-motd-0.1.5-amd64-1.txz</URL>
+<SHA256>ec8c37cfe0d2243a127eaa74480c0b911edc2672352358e39e25c4a0afc1c15b</SHA256>
+</FILE>
+
+<FILE Name="/boot/config/plugins/motd/figurine_linux_amd64_v1.3.0.tar.gz">
+<URL>https://github.com/arsham/figurine/releases/download/v1.3.0/figurine_linux_amd64_v1.3.0.tar.gz</URL>
+<SHA256>e72430de0ca4b4b4548495d803856f5fec223f43c59a97a0bfcc714710d5032a</SHA256>
 </FILE>
 
 <!--
@@ -32,13 +37,16 @@ The 'install' script.
 <INLINE>
 <![CDATA[
 
+tar xf /boot/config/plugins/motd/figurine_linux_amd64_v1.3.0.tar.gz -C /usr/local/bin/ --strip-components=1 deploy/figurine
+
 # cleanup old versions
-rm -f $(ls /boot/config/plugins/motd/unraid-motd-*.txz 2>/dev/null | grep -v '0.1.4')
+rm -f $(ls /boot/config/plugins/motd/unraid-motd-*.txz 2>/dev/null | grep -v '0.1.5')
+rm -f $(ls /boot/config/plugins/motd/figurine_linux_amd64_*.tar.gz 2>/dev/null | grep -v 'v1.3.0')
 
 echo ""
 echo "----------------------------------------------------"
 echo " motd has been installed."
-echo " Version: 0.1.4"
+echo " Version: 0.1.5"
 echo "----------------------------------------------------"
 echo ""
 ]]>
@@ -52,6 +60,8 @@ The 'remove' script.
 <INLINE>
 <![CDATA[
 removepkg unraid-figurine
+
+rm -f /usr/local/bin/figurine
 
 rm -rf /usr/local/emhttp/plugins/motd
 rm -rf /boot/config/plugins/motd
