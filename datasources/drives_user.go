@@ -2,9 +2,10 @@ package datasources
 
 import (
 	"fmt"
-	"github.com/shirou/gopsutil/v3/disk"
 	"slices"
 	"strings"
+
+	"github.com/shirou/gopsutil/v3/disk"
 )
 
 func GetUserDrives(channel chan<- SourceReturn, conf *Conf) {

@@ -85,8 +85,6 @@ var args struct {
 	DumpConfig      bool   `arg:"--dump-config"                           help:"Dump config and exit"`
 	HideUnavailable bool   `arg:"--hide-unavailable,env:HIDE_UNAVAILABLE" help:"Hide unavailable modules"`
 	LogLevel        string `arg:"--log-level,env:LOG_LEVEL"               help:"Set log level"`
-	PID             string `arg:"--pid"                                   help:"Write PID to file or log if '-'"`
-	Quiet           bool   `arg:"-q,--quiet"                              help:"Don't log to console"`
 }
 
 func setupLogging() {
@@ -120,7 +118,7 @@ func setupLogging() {
 	}
 	log.SetLevel(logLevel)
 	levels := getLogLevels(logLevel)
-	if !args.Quiet {
+	if args.Debug {
 		log.AddHook(&writer.Hook{
 			Writer:    os.Stderr,
 			LogLevels: levels,

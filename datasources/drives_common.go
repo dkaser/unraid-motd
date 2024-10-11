@@ -2,6 +2,7 @@ package datasources
 
 import (
 	"fmt"
+
 	"github.com/dkaser/unraid-motd/utils"
 	"github.com/shirou/gopsutil/v3/disk"
 )

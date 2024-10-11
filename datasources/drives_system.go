@@ -2,8 +2,9 @@ package datasources
 
 import (
 	"fmt"
-	"github.com/shirou/gopsutil/v3/disk"
 	"slices"
+
+	"github.com/shirou/gopsutil/v3/disk"
 )
 
 func GetSystemDrives(channel chan<- SourceReturn, conf *Conf) {

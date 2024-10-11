@@ -1,42 +1,36 @@
 
 # Introduction
 
-You can dump the default config by passing an invalid path as the `-c/--config` argument and using `--dump-config` at the same time.
-
-## Requirements
-
-- Kernel 5.6+ (drivetemp module) or hddtemp daemon are required for disk temps
-- `dockerMinAPI` in [docker.go](./datasources/docker.go) might need tweaking
-- `lm_sensors` for CPU temperatures
-
-## Running
-
-Assuming it was installed as outlined above, just run the binary by adding `go-motd` in your shell rc file.
-
 ## Configuration
+
+Configuration can be stored at `/boot/config/plugins/motd/config.yaml`.
+
+To view the full configuration, run `motd --dump-config`
 
 ### Global
 
 - `warnings_only` will hide content unless there is a warning, per-module override available
-- `show_order` list of enabled modules, they will be displayed in the same order. If not defined, the order in [defaultOrder](./motd.go#L18) will be used.
-- `col_def` arrange module output in columns as defined by a 2-dimensional array, configuration for example pictures shown below. Note that this overrides `show_order`.
+- `display` arrange module output in columns. Either one or two modules can be included per row.
+- `border` draw borders around the output of each module.
 
 ```yaml
-col_def:
+display:
   - [sysinfo]
-  - [updates]
-  - [docker, podman]
-  - [systemd]
-  - [cpu, disk]
-  - [zfs]
-  - [btrfs]
+  - [docker, cpu]
+  - [services, networks]
+  - [user-drives, system-drives]
 ```
 
-- `col_pad` number of spaces between columns
+### Header
+
+- `show` display fancy header at beginning of output
+- `use_hostname` if true, display the hostname. If false, display `custom_text`
+- `font` select font to use for output . See [figurine](https://github.com/arsham/figurine/tree/master/figurine/fonts) for a list of available fonts.
 
 ### Generic options
 
 - `warnings_only` overrides global setting for that module only
+- `border` overrides global setting for that module only
 
 ### CPU temperatures
 
@@ -49,6 +43,10 @@ col_def:
 ### Docker
 
 - `ignore` list of ignored container names
+
+### Network
+
+- `show_ipv4` / `show_ipv6` show IPv4/IPv6 addresses in output
 
 ### System information
 

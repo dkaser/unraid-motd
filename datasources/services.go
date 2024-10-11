@@ -1,14 +1,15 @@
 package datasources
 
 import (
-	"github.com/dkaser/unraid-motd/utils"
+	"errors"
+	"fmt"
+	"os"
 	"os/exec"
 	"regexp"
-	"os"
-	"errors"
-	"gopkg.in/ini.v1"
 	"strings"
-	"fmt"
+
+	"github.com/dkaser/unraid-motd/utils"
+	"gopkg.in/ini.v1"
 )
 
 type ConfServices struct {
@@ -47,19 +48,19 @@ func getServiceStatus(sourceConf *ConfServices) (content string) {
 	overall := utils.Good("OK")
 
 	ident, err := ini.Load("/boot/config/ident.cfg")
-    if err != nil {
-        fmt.Printf("Fail to read file: %v", err)
-    }
+	if err != nil {
+		fmt.Printf("Fail to read file: %v", err)
+	}
 
 	shares, err := ini.Load("/boot/config/share.cfg")
-    if err != nil {
-        fmt.Printf("Fail to read file: %v", err)
-    }
+	if err != nil {
+		fmt.Printf("Fail to read file: %v", err)
+	}
 
 	docker, err := ini.Load("/boot/config/docker.cfg")
-    if err != nil {
-        fmt.Printf("Fail to read file: %v", err)
-    }
+	if err != nil {
+		fmt.Printf("Fail to read file: %v", err)
+	}
 
 	//SERVICES:
 	for _, service := range sourceConf.Services {
@@ -67,22 +68,22 @@ func getServiceStatus(sourceConf *ConfServices) (content string) {
 		service = reg.ReplaceAllString(service, "")
 
 		switch service {
-			case "sshd":
-				if (strings.ToLower(ident.Section("").Key("USE_SSH").String()) == "no") {
-					continue
-				}
-			case "nfsd":
-				if (strings.ToLower(shares.Section("").Key("shareNFSEnabled").String()) == "no") {
-					continue
-				}
-			case "samba":
-				if (strings.ToLower(shares.Section("").Key("shareSMBEnabled").String()) == "no") {
-					continue
-				}
-			case "docker":
-				if (strings.ToLower(docker.Section("").Key("DOCKER_ENABLED").String()) == "no") {
-					continue
-				}
+		case "sshd":
+			if strings.ToLower(ident.Section("").Key("USE_SSH").String()) == "no" {
+				continue
+			}
+		case "nfsd":
+			if strings.ToLower(shares.Section("").Key("shareNFSEnabled").String()) == "no" {
+				continue
+			}
+		case "samba":
+			if strings.ToLower(shares.Section("").Key("shareSMBEnabled").String()) == "no" {
+				continue
+			}
+		case "docker":
+			if strings.ToLower(docker.Section("").Key("DOCKER_ENABLED").String()) == "no" {
+				continue
+			}
 		}
 
 		cmd := exec.Command("/etc/rc.d/rc."+service, "status") // #nosec G204

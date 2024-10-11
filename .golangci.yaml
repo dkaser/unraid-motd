@@ -25,6 +25,7 @@ linters:
     - godox
     - gofmt
     - goheader
+    - goimports
     - gosec
     - gosimple
     - govet

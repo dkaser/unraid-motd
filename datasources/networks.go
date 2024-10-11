@@ -1,20 +1,21 @@
 package datasources
 
 import (
-	"github.com/shirou/gopsutil/v3/net"
 	"strings"
+
+	"github.com/shirou/gopsutil/v3/net"
 )
 
 type ConfNet struct {
-	ConfBaseWarn `yaml:",inline"`
-	IPv4         bool `yaml:"show_ipv4"`
-	IPv6         bool `yaml:"show_ipv6"`
+	ConfBase `yaml:",inline"`
+	IPv4     bool `yaml:"show_ipv4"`
+	IPv6     bool `yaml:"show_ipv6"`
 }
 
 // Init is mandatory
 func (c *ConfNet) Init() {
 	// Base init must be called
-	c.ConfBaseWarn.Init()
+	c.ConfBase.Init()
 
 	c.IPv4 = true
 	c.IPv6 = false
