@@ -20,7 +20,7 @@ import (
 	"golang.org/x/term"
 )
 
-var defaultCfgPath = "./config.yaml"
+var defaultCfgPath = "/boot/config/plugins/motd/config.yaml"
 
 func makeTable(buf *strings.Builder, padding int) (table *tablewriter.Table) {
 	table = tablewriter.NewWriter(buf)
