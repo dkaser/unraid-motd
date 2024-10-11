@@ -1,4 +1,3 @@
-
 # Introduction
 
 ## Configuration
@@ -25,7 +24,7 @@ display:
 
 - `show` display fancy header at beginning of output
 - `use_hostname` if true, display the hostname. If false, display `custom_text`
-- `font` select font to use for output . See [figurine](https://github.com/arsham/figurine/tree/master/figurine/fonts) for a list of available fonts.
+- `font` select font to use for output. Run `figurine -l` to get a list of available fonts, or `figurine -sl Test` to view a sample of all fonts.
 
 ### Generic options
 
