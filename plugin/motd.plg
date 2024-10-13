@@ -4,7 +4,7 @@
 <PLUGIN 
   name="motd"
   author="Derek Kaser"
-  version="0.1.6"
+  version="0.1.7"
   pluginURL="https://raw.githubusercontent.com/dkaser/unraid-motd/main/plugin/motd.plg"
   support="https://github.com/dkaser/unraid-motd/issues"
   min="6.11.5"
@@ -13,16 +13,16 @@
 
 <CHANGES>
 <![CDATA[
-###0.1.6###
-Improve ZFS behavior
+###0.1.7###
+Report used memory instead of active
 
 For older releases, see https://github.com/dkaser/unraid-motd/releases
 ]]>
 </CHANGES>
 
-<FILE Name="/boot/config/plugins/motd/unraid-motd-0.1.6-amd64-1.txz" Run="upgradepkg --install-new">
-<URL>https://github.com/dkaser/unraid-motd/releases/download/0.1.6/unraid-motd-0.1.6-amd64-1.txz</URL>
-<SHA256>cc6a07d0ca9663d244955abdbccca277693e70c54dc70fa3dcb56b3815ef65e9</SHA256>
+<FILE Name="/boot/config/plugins/motd/unraid-motd-0.1.7-amd64-1.txz" Run="upgradepkg --install-new">
+<URL>https://github.com/dkaser/unraid-motd/releases/download/0.1.7/unraid-motd-0.1.7-amd64-1.txz</URL>
+<SHA256>baf22808afb37e1f9eec5246cb3c0b670a375a462f39fb39d471895c07fe366d</SHA256>
 </FILE>
 
 <FILE Name="/boot/config/plugins/motd/figurine_linux_amd64_v1.3.0.tar.gz">
@@ -40,13 +40,13 @@ The 'install' script.
 tar xf /boot/config/plugins/motd/figurine_linux_amd64_v1.3.0.tar.gz -C /usr/local/bin/ --strip-components=1 deploy/figurine
 
 # cleanup old versions
-rm -f $(ls /boot/config/plugins/motd/unraid-motd-*.txz 2>/dev/null | grep -v '0.1.6')
+rm -f $(ls /boot/config/plugins/motd/unraid-motd-*.txz 2>/dev/null | grep -v '0.1.7')
 rm -f $(ls /boot/config/plugins/motd/figurine_linux_amd64_*.tar.gz 2>/dev/null | grep -v 'v1.3.0')
 
 echo ""
 echo "----------------------------------------------------"
 echo " motd has been installed."
-echo " Version: 0.1.6"
+echo " Version: 0.1.7"
 echo "----------------------------------------------------"
 echo ""
 ]]>
