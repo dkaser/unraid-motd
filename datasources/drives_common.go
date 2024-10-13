@@ -2,13 +2,16 @@ package datasources
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/dkaser/unraid-motd/utils"
+	zfs "github.com/mistifyio/go-zfs/v3"
 	"github.com/shirou/gopsutil/v3/disk"
 )
 
 type ConfDrives struct {
-	ConfBaseWarn `yaml:",inline"`
+	ConfBaseWarn    `yaml:",inline"`
+	ShowZFSDatasets bool `yaml:"show_zfs_datasets"`
 }
 
 // Init is mandatory
@@ -16,19 +19,25 @@ func (c *ConfDrives) Init() {
 	// Base init must be called
 	c.ConfBaseWarn.Init()
 	c.WarnOnly = new(bool)
+	c.ShowZFSDatasets = false
 }
 
 func getSystemDirs() []string {
 	return []string{"/var/log", "/boot", "/var/lib/docker"}
 }
 
-func processDrive(sourceConf *ConfDrives, mountpoint string, status string) (newStatus string, percent int, used string, total string) {
-	diskUsage, _ := disk.Usage(mountpoint)
+func processDrive(sourceConf *ConfDrives, mountpoint string, fsType string, status string) (newStatus string, percent int, used string, total string, err error) {
+	switch fsType {
+	case "zfs":
+		newStatus, percent, used, total, err = processDriveZFS(sourceConf, mountpoint, status)
+	default:
+		newStatus, percent, used, total = processDriveGeneric(sourceConf, mountpoint, status)
+	}
 
-	used = utils.FormatBytes(float64(diskUsage.Used))
-	total = utils.FormatBytes(float64(diskUsage.Total))
-	percent = int(diskUsage.UsedPercent)
+	return
+}
 
+func getStatus(sourceConf *ConfDrives, status string, percent int) string {
 	if percent >= sourceConf.Warn && percent < sourceConf.Crit {
 		if status != "e" {
 			status = "w"
@@ -37,7 +46,38 @@ func processDrive(sourceConf *ConfDrives, mountpoint string, status string) (new
 		status = "e"
 	}
 
-	newStatus = status
+	return status
+}
+
+func processDriveZFS(sourceConf *ConfDrives, mountpoint string, status string) (newStatus string, percent int, used string, total string, err error) {
+	dataset, _ := zfs.GetDataset(mountpoint)
+
+	if (!sourceConf.ShowZFSDatasets) && strings.Contains(dataset.Name, "/") {
+		err = ZFSError("Skipping dataset")
+
+		return
+	}
+
+	usedVal := float64(dataset.Used)
+	totalVal := float64(dataset.Used) + float64(dataset.Avail)
+
+	used = utils.FormatBytes(usedVal)
+	total = utils.FormatBytes(totalVal)
+	percent = int((usedVal / totalVal) * 100)
+
+	newStatus = getStatus(sourceConf, status, percent)
+
+	return
+}
+
+func processDriveGeneric(sourceConf *ConfDrives, mountpoint string, status string) (newStatus string, percent int, used string, total string) {
+	diskUsage, _ := disk.Usage(mountpoint)
+
+	used = utils.FormatBytes(float64(diskUsage.Used))
+	total = utils.FormatBytes(float64(diskUsage.Total))
+	percent = int(diskUsage.UsedPercent)
+
+	newStatus = getStatus(sourceConf, status, percent)
 
 	return
 }

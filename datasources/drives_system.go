@@ -36,7 +36,11 @@ PARTITIONS:
 			continue PARTITIONS
 		}
 
-		newStatus, percent, used, total := processDrive(sourceConf, partition.Mountpoint, status)
+		newStatus, percent, used, total, err := processDrive(sourceConf, partition.Mountpoint, partition.Fstype, status)
+		if err != nil {
+			continue
+		}
+
 		status = newStatus
 		if (percent >= sourceConf.Warn) || (!*sourceConf.WarnOnly) {
 			outputTable.AppendRow([]interface{}{partition.Mountpoint, formatDriveUsage(sourceConf, percent), fmt.Sprintf("%s %s %s", used, "used out of", total)})
