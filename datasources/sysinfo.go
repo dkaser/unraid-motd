@@ -135,20 +135,20 @@ func getMemoryInfo() (retStr string) {
 
 	scanner := bufio.NewScanner(file)
 	// Look for active and total
-	var memActive float64
+	var memAvailable float64
 	var memTotal float64
-	reActive := regexp.MustCompile(`Active:\s+(\d+)`)
+	reAvailable := regexp.MustCompile(`MemAvailable:\s+(\d+)`)
 	reTotal := regexp.MustCompile(`MemTotal:\s+(\d+)`)
 	for scanner.Scan() {
-		if memTotal != 0 && memActive != 0 {
+		if memTotal != 0 && memAvailable != 0 {
 			break
 		}
-		if memActive == 0 {
+		if memAvailable == 0 {
 			// Look for active
-			m := reActive.FindSubmatch(scanner.Bytes())
+			m := reAvailable.FindSubmatch(scanner.Bytes())
 			if len(m) > 1 {
 				// Store as int
-				memActive, _ = strconv.ParseFloat(string(m[1]), 64)
+				memAvailable, _ = strconv.ParseFloat(string(m[1]), 64)
 			}
 		}
 		if memTotal == 0 {
@@ -159,6 +159,7 @@ func getMemoryInfo() (retStr string) {
 			}
 		}
 	}
+	memUsed := memTotal - memAvailable
 	if err := scanner.Err(); err != nil {
 		retStr = utils.Warn("unavailable")
 
@@ -166,7 +167,7 @@ func getMemoryInfo() (retStr string) {
 	}
 
 	// Convert to GB, meminfo is in kB
-	return fmt.Sprintf("%.2f GB active of %.2f GB", memActive/1e6, memTotal/1e6)
+	return fmt.Sprintf("%d%% used (%s of %s)", int((memUsed/memTotal)*100), utils.FormatBytes(memUsed*1024), utils.FormatBytes(memTotal*1024))
 }
 
 func getKernel() string {
