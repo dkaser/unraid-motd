@@ -4,25 +4,25 @@
 <PLUGIN 
   name="motd"
   author="Derek Kaser"
-  version="0.1.7"
+  version="2024.10.14"
   pluginURL="https://raw.githubusercontent.com/dkaser/unraid-motd/main/plugin/motd.plg"
-  support="https://github.com/dkaser/unraid-motd/issues"
+  support="https://forums.unraid.net/topic/177200-support-motd-message-of-the-day/"
   min="6.11.5"
-  icon="fa-wrench"
+  icon="fa-desktop"
 >
 
 <CHANGES>
 <![CDATA[
-###0.1.7###
-- Report used memory instead of active
+###2024.10.14###
+- Initial release for CA
 
 For older releases, see https://github.com/dkaser/unraid-motd/releases
 ]]>
 </CHANGES>
 
-<FILE Name="/boot/config/plugins/motd/unraid-motd-0.1.7-amd64-1.txz" Run="upgradepkg --install-new">
-<URL>https://github.com/dkaser/unraid-motd/releases/download/0.1.7/unraid-motd-0.1.7-amd64-1.txz</URL>
-<SHA256>d4093ed94612e9dcff3f2bf61f3505059de08f758a6dce75dd29fb12258200ad</SHA256>
+<FILE Name="/boot/config/plugins/motd/unraid-motd-2024.10.14-amd64-1.txz" Run="upgradepkg --install-new">
+<URL>https://github.com/dkaser/unraid-motd/releases/download/2024.10.14/unraid-motd-2024.10.14-amd64-1.txz</URL>
+<SHA256>391ce8dffe3fe464f7f0a8038daebb6c9524bc4170d230b5fe974935fc681b6d</SHA256>
 </FILE>
 
 <FILE Name="/boot/config/plugins/motd/figurine_linux_amd64_v1.3.0.tar.gz">
@@ -40,13 +40,13 @@ The 'install' script.
 tar xf /boot/config/plugins/motd/figurine_linux_amd64_v1.3.0.tar.gz -C /usr/local/bin/ --strip-components=1 deploy/figurine
 
 # cleanup old versions
-rm -f $(ls /boot/config/plugins/motd/unraid-motd-*.txz 2>/dev/null | grep -v '0.1.7')
+rm -f $(ls /boot/config/plugins/motd/unraid-motd-*.txz 2>/dev/null | grep -v '2024.10.14')
 rm -f $(ls /boot/config/plugins/motd/figurine_linux_amd64_*.tar.gz 2>/dev/null | grep -v 'v1.3.0')
 
 echo ""
 echo "----------------------------------------------------"
 echo " motd has been installed."
-echo " Version: 0.1.7"
+echo " Version: 2024.10.14"
 echo "----------------------------------------------------"
 echo ""
 ]]>
