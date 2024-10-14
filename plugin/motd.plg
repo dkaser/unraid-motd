@@ -14,7 +14,7 @@
 <CHANGES>
 <![CDATA[
 ###0.1.7###
-Report used memory instead of active
+- Report used memory instead of active
 
 For older releases, see https://github.com/dkaser/unraid-motd/releases
 ]]>
@@ -22,7 +22,7 @@ For older releases, see https://github.com/dkaser/unraid-motd/releases
 
 <FILE Name="/boot/config/plugins/motd/unraid-motd-0.1.7-amd64-1.txz" Run="upgradepkg --install-new">
 <URL>https://github.com/dkaser/unraid-motd/releases/download/0.1.7/unraid-motd-0.1.7-amd64-1.txz</URL>
-<SHA256>baf22808afb37e1f9eec5246cb3c0b670a375a462f39fb39d471895c07fe366d</SHA256>
+<SHA256>d4093ed94612e9dcff3f2bf61f3505059de08f758a6dce75dd29fb12258200ad</SHA256>
 </FILE>
 
 <FILE Name="/boot/config/plugins/motd/figurine_linux_amd64_v1.3.0.tar.gz">
