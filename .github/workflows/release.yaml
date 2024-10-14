@@ -5,7 +5,7 @@ on:
 
 env:
   FILE_NAME: unraid-motd
-  
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -53,7 +53,7 @@ jobs:
           comment: |-
             ${{ env.FILE_NAME }}-${{ github.event.release.name}}-amd64-1.txz : ${{ steps.build_files.outputs.checksum }}
 
-      - name: Template 
+      - name: Template
         uses: cuchi/jinja2-action@v1.2.2
         with:
           template: main/plugin/motd.j2
@@ -65,8 +65,14 @@ jobs:
             changelog=${{ github.event.release.body }}
 
       - name: Commit plugin file
-        uses: EndBug/add-and-commit@v9
-        with:
-          cwd: main
-          add: 'plugin/motd.plg'
-          default_author: github_actor
+        run: |
+          gh api graphql \
+            -F $githubRepository=$GITHUB_REPOSITORY \
+            -F branchName=$BRANCH \
+            -F expectedHeadOid=$(git rev-parse HEAD) \
+            -F commitMessage="release: update plugin file for ${{ github.event.release.name }}" \
+            -F files[][path]="plugin/motd.plg" -F files[][contents]=$(base64 -w0 plugin/motd.plg) \
+            -F 'query=@.github/api/createCommitOnBranch.gql'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: "main"
