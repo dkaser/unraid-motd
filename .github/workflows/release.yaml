@@ -68,12 +68,11 @@ jobs:
         run: |
           cd main
           gh api graphql \
-            -F $githubRepository=$GITHUB_REPOSITORY \
-            -F branchName=$BRANCH \
+            -F $githubRepository=dkaser/unraid-motd \
+            -F branchName=main \
             -F expectedHeadOid=$(git rev-parse HEAD) \
             -F commitMessage="release: update plugin file for ${{ github.event.release.name }}" \
             -F pluginFile[path]="plugin/motd.plg" -F pluginFile[contents]=$(base64 -w0 plugin/motd.plg) \
             -F 'query=@.github/api/createCommitOnBranch.gql'
         env:
           GH_TOKEN: ${{ github.token }}
-          BRANCH: "main"
