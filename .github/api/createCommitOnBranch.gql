@@ -12,7 +12,7 @@ mutation (
         branchName: $branchName
       }
       message: { headline: $commitMessage }
-      fileChanges: { additions: $files }
+      fileChanges: { additions: [$pluginFile] }
       expectedHeadOid: $expectedHeadOid
     }
   ) {
