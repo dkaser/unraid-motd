@@ -13,6 +13,8 @@ import (
 	"github.com/dkaser/unraid-motd/utils"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
+
+	"github.com/shirou/gopsutil/v3/cpu"
 )
 
 type ConfSysInfo struct {
@@ -48,6 +50,7 @@ func GetSysInfo(channel chan<- SourceReturn, conf *Conf) {
 		{"Version", getDistroName()},
 		{"Kernel", getKernel()},
 		{"Uptime", getUptime()},
+		{"CPU", getCPU()},
 		{"Load", getLoadAvg()},
 		{"RAM", getMemoryInfo()},
 	}
@@ -55,6 +58,22 @@ func GetSysInfo(channel chan<- SourceReturn, conf *Conf) {
 		outputTable.AppendRow([]interface{}{e.name, e.content})
 	}
 	returnData.Content = RenderTable(outputTable, "")
+}
+
+func getCPU() (retStr string) {
+	times, _ := cpu.Times(false)
+
+	totalCPU := times[0]
+	totalCount := totalCPU.User + totalCPU.System + totalCPU.Idle + totalCPU.Iowait + totalCPU.Softirq
+
+	userPercent := (totalCPU.User / totalCount) * 100
+	systemPercent := (totalCPU.System / totalCount) * 100
+	idlePercent := (totalCPU.Idle / totalCount) * 100
+	ioWaitPercent := (totalCPU.Iowait / totalCount) * 100
+
+	retStr = fmt.Sprintf("Usr: %.1f%% Sys: %.1f%% IO: %.1f%% Idle: %.1f%%", userPercent, systemPercent, ioWaitPercent, idlePercent)
+
+	return
 }
 
 // runCmd executes command and returns stdout as string
