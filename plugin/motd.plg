@@ -59,7 +59,7 @@ The 'remove' script.
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
 <![CDATA[
-removepkg unraid-figurine
+removepkg unraid-motd
 
 rm -f /usr/local/bin/figurine
 
