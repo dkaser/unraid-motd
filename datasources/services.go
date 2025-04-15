@@ -2,7 +2,6 @@ package datasources
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"os/exec"
 	"regexp"
@@ -47,19 +46,25 @@ func getServiceStatus(sourceConf *ConfServices) (content string) {
 
 	overall := utils.Good("OK")
 
+	sshDisabled := true
+	smbDisabled := true
+	nfsDisabled := true
+	dockerDisabled := true
+
 	ident, err := ini.Load("/boot/config/ident.cfg")
-	if err != nil {
-		fmt.Printf("Fail to read file: %v", err)
+	if err == nil {
+		sshDisabled = strings.ToLower(ident.Section("").Key("USE_SSH").String()) == "no"
 	}
 
 	shares, err := ini.Load("/boot/config/share.cfg")
-	if err != nil {
-		fmt.Printf("Fail to read file: %v", err)
+	if err == nil {
+		smbDisabled = strings.ToLower(shares.Section("").Key("shareSMBEnabled").String()) == "no"
+		nfsDisabled = strings.ToLower(shares.Section("").Key("shareNFSEnabled").String()) == "no"
 	}
 
 	docker, err := ini.Load("/boot/config/docker.cfg")
-	if err != nil {
-		fmt.Printf("Fail to read file: %v", err)
+	if err == nil {
+		dockerDisabled = strings.ToLower(docker.Section("").Key("DOCKER_ENABLED").String()) == "no"
 	}
 
 	//SERVICES:
@@ -69,19 +74,19 @@ func getServiceStatus(sourceConf *ConfServices) (content string) {
 
 		switch service {
 		case "sshd":
-			if strings.ToLower(ident.Section("").Key("USE_SSH").String()) == "no" {
+			if sshDisabled {
 				continue
 			}
 		case "nfsd":
-			if strings.ToLower(shares.Section("").Key("shareNFSEnabled").String()) == "no" {
+			if nfsDisabled {
 				continue
 			}
 		case "samba":
-			if strings.ToLower(shares.Section("").Key("shareSMBEnabled").String()) == "no" {
+			if smbDisabled {
 				continue
 			}
 		case "docker":
-			if strings.ToLower(docker.Section("").Key("DOCKER_ENABLED").String()) == "no" {
+			if dockerDisabled {
 				continue
 			}
 		}
