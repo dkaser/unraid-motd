@@ -1,7 +1,7 @@
 # Introduction
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
-[![GitHub Releases](https://img.shields.io/github/v/release/unraid/unraid-motd)](https://github.com/dkaser/unraid-motd/releases)
+[![GitHub Releases](https://img.shields.io/github/v/release/dkaser/unraid-motd)](https://github.com/dkaser/unraid-motd/releases)
 [![Last Commit](https://img.shields.io/github/last-commit/dkaser/unraid-motd)](https://github.com/dkaser/unraid-motd/commits/main/)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/dkaser/unraid-motd/total)
 ![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/dkaser/unraid-motd/latest/total)
