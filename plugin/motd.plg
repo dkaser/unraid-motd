@@ -4,7 +4,7 @@
 <PLUGIN 
   name="motd"
   author="Derek Kaser"
-  version="2025.04.15"
+  version="2026.05.24"
   pluginURL="https://raw.githubusercontent.com/dkaser/unraid-motd/main/plugin/motd.plg"
   support="https://forums.unraid.net/topic/177200-support-motd-message-of-the-day/"
   min="6.11.5"
@@ -13,16 +13,16 @@
 
 <CHANGES>
 <![CDATA[
-###2025.04.15###
-- Better handling for missing config files
+###2026.05.24###
+* fix: more robust container name detection
 
 For older releases, see https://github.com/dkaser/unraid-motd/releases
 ]]>
 </CHANGES>
 
-<FILE Name="/boot/config/plugins/motd/unraid-motd-2025.04.15-amd64-1.txz" Run="upgradepkg --install-new">
-<URL>https://github.com/dkaser/unraid-motd/releases/download/2025.04.15/unraid-motd-2025.04.15-amd64-1.txz</URL>
-<SHA256>13d5e0da86737a724f282d868d8d7b3b9ddbadc3c1324460d2a8dc155aad8dab</SHA256>
+<FILE Name="/boot/config/plugins/motd/unraid-motd-2026.05.24-amd64-1.txz" Run="upgradepkg --install-new">
+<URL>https://github.com/dkaser/unraid-motd/releases/download/2026.05.24/unraid-motd-2026.05.24-amd64-1.txz</URL>
+<SHA256>90dd3cccf7ed1d1253eb76ba83fb8cf496b0fc6eda6718c0b48bdda797c5e5ed</SHA256>
 </FILE>
 
 <FILE Name="/boot/config/plugins/motd/figurine_linux_amd64_v1.3.0.tar.gz">
@@ -40,13 +40,13 @@ The 'install' script.
 tar xf /boot/config/plugins/motd/figurine_linux_amd64_v1.3.0.tar.gz -C /usr/local/bin/ --strip-components=1 deploy/figurine
 
 # cleanup old versions
-rm -f $(ls /boot/config/plugins/motd/unraid-motd-*.txz 2>/dev/null | grep -v '2025.04.15')
+rm -f $(ls /boot/config/plugins/motd/unraid-motd-*.txz 2>/dev/null | grep -v '2026.05.24')
 rm -f $(ls /boot/config/plugins/motd/figurine_linux_amd64_*.tar.gz 2>/dev/null | grep -v 'v1.3.0')
 
 echo ""
 echo "----------------------------------------------------"
 echo " motd has been installed."
-echo " Version: 2025.04.15"
+echo " Version: 2026.05.24"
 echo "----------------------------------------------------"
 echo ""
 ]]>
