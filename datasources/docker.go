@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 
@@ -62,10 +63,29 @@ func getDockerContainers() (containers containerList, err error) {
 	containers.Root = true
 	for _, container := range allContainers {
 		containers.Containers = append(containers.Containers, containerStatus{
-			Name:   strings.TrimPrefix(container.Names[0], "/"),
+			Name:   dockerContainerName(container),
 			Status: container.State,
 		})
 	}
 
 	return
+}
+
+func dockerContainerName(container types.Container) string {
+	for _, name := range container.Names {
+		name = strings.TrimPrefix(strings.TrimSpace(name), "/")
+		if name != "" {
+			return name
+		}
+	}
+
+	id := strings.TrimSpace(container.ID)
+	if len(id) > 12 {
+		id = id[:12]
+	}
+	if id != "" {
+		return id
+	}
+
+	return "unknown"
 }
