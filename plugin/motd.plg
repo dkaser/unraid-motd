@@ -4,7 +4,7 @@
 <PLUGIN 
   name="motd"
   author="Derek Kaser"
-  version="2026.05.24"
+  version="2026.10.18.0000"
   pluginURL="https://raw.githubusercontent.com/dkaser/unraid-motd/main/plugin/motd.plg"
   support="https://forums.unraid.net/topic/177200-support-motd-message-of-the-day/"
   min="6.11.5"
@@ -13,10 +13,10 @@
 
 <CHANGES>
 <![CDATA[
-###2026.05.24###
-* fix: more robust container name detection
+###2026.10.18.0000###
+## End of Support
 
-For older releases, see https://github.com/dkaser/unraid-motd/releases
+With the news around U8, I'm deciding to step back from maintaining any plugins that I don't actively use. As such, I won't be doing any further updates to the plugin. I will leave it in Community Applications. If someone wants to fork the plugin and continue maintaining it, feel free; once a replacement is ready, I'd be happy to help facilitate the migration to the new repo.
 ]]>
 </CHANGES>
 
