@@ -4,8 +4,8 @@
 <PLUGIN 
   name="motd"
   author="Derek Kaser"
-  version="2026.10.18.0000"
-  pluginURL="https://raw.githubusercontent.com/dkaser/unraid-motd/main/plugin/motd.plg"
+  version="2026.10.18.0001"
+  pluginURL="https://raw.githubusercontent.com/SebastianOehm/unraid-motd/main/plugin/motd.plg"
   support="https://forums.unraid.net/topic/177200-support-motd-message-of-the-day/"
   min="6.11.5"
   icon="fa-desktop"
@@ -13,6 +13,9 @@
 
 <CHANGES>
 <![CDATA[
+###2026.10.18.0001###
+- Change pluginURL to new maintainer/repo
+
 ###2026.10.18.0000###
 ## End of Support
 
